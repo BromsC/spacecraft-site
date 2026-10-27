@@ -1,7 +1,7 @@
 ---
 name: Bo Karlsson
 role: Sculpture
-shortBio: Placeholder bio for Bo Karlsson. Replace with a short introduction.
+shortBio: Placeholder bio for Bo Karlsson. Replace with a short introduction. HEJ ANNE!!!
 portrait: /uploads/bo-karlsson-portrait.svg
 gallery:
   - image: /uploads/bo-karlsson-work-1.svg
@@ -10,7 +10,7 @@ gallery:
     caption: Placeholder work 2
 links:
   - label: Website
-    url: https://example.com/
+    url: 'https://example.com/'
 order: 2
 featured: true
 ---
