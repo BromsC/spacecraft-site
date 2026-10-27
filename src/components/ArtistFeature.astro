@@ -1,0 +1,32 @@
+---
+import { render } from 'astro:content';
+import type { Artist } from '../lib/content';
+import { url } from '../lib/url';
+
+// Image on one side, name + period and body text on the other (Figma "MacBook Pro 14 - 3").
+interface Props {
+  artist: Artist;
+  id?: string;
+  // h1 on the artist's own page, h2 on the home page.
+  headingLevel?: 1 | 2;
+}
+
+const { artist, id, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 1 ? 'h1' : 'h2';
+const { name, period, mainImage, imageSide } = artist.data;
+const { Content } = await render(artist);
+---
+
+<section id={id} class:list={['section', 'feature', `feature--image-${imageSide}`]}>
+  <Heading class="feature__title">
+    {name}
+    {period && (<><br />{period}</>)}
+  </Heading>
+  <div class="feature__media">
+    {mainImage && <img src={url(mainImage)} alt={name} width="726" height="726" />}
+  </div>
+  <div class="feature__body prose">
+    <Content />
+    <slot />
+  </div>
+</section>

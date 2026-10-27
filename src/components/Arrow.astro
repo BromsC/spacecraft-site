@@ -1,0 +1,42 @@
+---
+// The blue arrow from the Figma mockup. Stroke is currentColor; .arrow sets it to the accent token.
+// Size it with CSS (width or height); the viewBox keeps the proportions.
+interface Props {
+  direction: 'right' | 'down';
+  class?: string;
+}
+
+const { direction, class: className } = Astro.props;
+---
+
+{
+  direction === 'right' ? (
+    <svg
+      class:list={['arrow', 'arrow--right', className]}
+      viewBox="0 0 110 24"
+      width="110"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M0 12H108M98 2l10 10-10 10" vector-effect="non-scaling-stroke" />
+    </svg>
+  ) : (
+    <svg
+      class:list={['arrow', 'arrow--down', className]}
+      viewBox="0 0 60 110"
+      width="60"
+      height="110"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="5"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M30 0V107M3 80l27 27 27-27" />
+    </svg>
+  )
+}

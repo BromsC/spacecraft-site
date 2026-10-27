@@ -54,7 +54,6 @@ content/                 # all editable content (Tina writes here, Astro reads h
   site/settings.json     # singleton: site title, tagline, social links, footer
   exhibition/current.md  # singleton: the current exhibition
   artists/*.md           # one file per artist; filename = URL slug
-  pages/*.md             # generic pages (about, …); filename = URL slug
 public/
   CNAME                  # thespacecraft.se — do not remove
   uploads/               # Tina media root (images uploaded via the CMS land here)
@@ -62,10 +61,11 @@ public/
 src/
   content.config.ts      # Astro collections — must mirror tina/config.ts
   lib/content.ts         # data helpers (getSiteSettings, getExhibition, getArtists, …)
-  layouts/Layout.astro   # shared shell: header nav + footer from site settings
-  components/            # .astro components (PascalCase filenames)
+  layouts/Layout.astro   # shared shell: <head>, font preload, sticky SiteHeader (no nav/footer)
+  components/            # .astro components (PascalCase): SiteHeader, ArtistFeature, ArtistContinued,
+                         #   ExhibitionLists, Arrow
   components/visual/     # client-only visual islands (Three.js etc. later)
-  pages/                 # routes: index, artists/index, artists/[slug], [slug], 404
+  pages/                 # routes: index, artists/index, artists/[slug], 404
   styles/global.css      # design tokens (:root) + global styles
 tina/
   config.ts              # Tina schema — must mirror src/content.config.ts
@@ -100,11 +100,10 @@ docs/
 
 ### Add a page
 
-- **Editable text page** (About, Info, Visit…): add `content/pages/<slug>.md` with a `title`
-  frontmatter field. It is served at `/<slug>` by `src/pages/[slug].astro`. Avoid slugs that clash
-  with real routes (`artists`, `admin`, `uploads`, `404`).
-- **New route with its own layout**: add `src/pages/<route>.astro`, wrap in `<Layout title="…">`.
-  If it should be in the nav, edit the `nav` array in `src/layouts/Layout.astro`.
+- There is no generic text-page collection any more (the `pages` collection was removed in the
+  design pass — see DECISIONS.md). For a new page add `src/pages/<route>.astro` and wrap it in
+  `<Layout title="…">`. There is no nav; the sticky header only links to the top of the page.
+  If editable text is needed, add a collection first (see above).
 
 ### Add a visual island
 

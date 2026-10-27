@@ -1,0 +1,51 @@
+---
+import { getExhibition, withPeriod } from '../lib/content';
+
+interface Props {
+  // Home page: hidden while #intro / #landing are in view, fades in once #landing is scrolled past.
+  autohide?: boolean;
+}
+
+const { autohide = false } = Astro.props;
+const ex = await getExhibition();
+---
+
+<header class="site-header" data-autohide={autohide ? '' : undefined}>
+  <a class="site-header__item site-header__title" href="#top"><span class="pill">{ex.title}</span></a>
+  <div class="site-header__meta">
+    {
+      ex.datesLine && (
+        <a class="site-header__item site-header__dates" href="#top">
+          <span class="pill">{ex.datesLine}</span>
+        </a>
+      )
+    }
+    {
+      ex.venue && (
+        <a class="site-header__item site-header__venue" href="#top">
+          <span class="pill">{withPeriod(ex.venue)}</span>
+        </a>
+      )
+    }
+  </div>
+</header>
+
+<script>
+  // Only the home page header has data-autohide.
+  const header = document.querySelector<HTMLElement>('.site-header[data-autohide]');
+  const landing = document.getElementById('landing');
+  if (header && landing) {
+    // Visible only once #landing has scrolled out of view upwards. The root is extended far
+    // downwards so "below the viewport" also counts as intersecting: the only transition is then
+    // in view/below ⇄ above, which fires even when a jump skips straight past #landing. The -1px
+    // top margin stops an edge-adjacent #landing (e.g. after the arrow link to #current) from
+    // counting as intersecting.
+    const observer = new IntersectionObserver(
+      ([entry]) => header.classList.toggle('is-visible', !entry.isIntersecting),
+      { rootMargin: '-1px 0px 100000px 0px' },
+    );
+    observer.observe(landing);
+  } else if (header) {
+    header.classList.add('is-visible');
+  }
+</script>

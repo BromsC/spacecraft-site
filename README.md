@@ -10,8 +10,8 @@ sessions: [CLAUDE.md](CLAUDE.md).
 
 ## Editing content
 
-Once Tina Cloud is connected, go to **https://thespacecraft.se/admin**, log in, and edit the
-exhibition, artists, pages and site settings. Saving commits the change to `main`, which
+Go to **https://thespacecraft.se/admin**, log in, and edit the exhibition, artists and site
+settings. Saving commits the change to `main`, which
 triggers a new deploy. Content lives as Markdown/JSON in [`content/`](content/); uploaded images
 go to `public/uploads/`.
 

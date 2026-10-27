@@ -1,0 +1,29 @@
+---
+import type { Artist } from '../lib/content';
+import { renderMarkdown } from '../lib/content';
+import { url } from '../lib/url';
+
+// "Text, continued" + second image (Figma "MacBook Pro 14 - 5"). The second image goes on the
+// side opposite the main image, so the text sits under the main image's column.
+// Renders nothing if the artist has neither field.
+interface Props {
+  artist: Artist;
+  id?: string;
+}
+
+const { artist, id } = Astro.props;
+const { name, continuedText, btsImage, imageSide } = artist.data;
+const html = continuedText ? renderMarkdown(continuedText) : '';
+const textSide = imageSide;
+---
+
+{
+  (html || btsImage) && (
+    <section id={id} class:list={['section', 'continued', `continued--text-${textSide}`]}>
+      <div class="continued__body prose" set:html={html} />
+      <div class="continued__media">
+        {btsImage && <img src={url(btsImage)} alt={name} width="720" height="822" loading="lazy" />}
+      </div>
+    </section>
+  )
+}
