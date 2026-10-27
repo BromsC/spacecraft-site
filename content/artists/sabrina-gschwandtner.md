@@ -4,6 +4,9 @@ status: current
 period: 30 October – 6 November
 order: 1
 imageSide: left
+mainImage: /uploads/Roni-1.png
+btsImage: /uploads/Instagram-post-7.png
+continuedText: ''
 ---
 
 Sabrina Gschwandtner (USA) is a visual artist and filmmaker. Two works by the artist are presented for the festival titled, “Hands at Work Video” (2017) and “Hand-painted Serpentine Dance" (2021). In the videos, archival footage is shaped, repeated and merged with colorful patterns creating a visual montage reminiscent of quilts.
