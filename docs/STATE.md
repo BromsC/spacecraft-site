@@ -7,7 +7,7 @@
 ## Status summary
 
 1. Foundation is built: Astro 7 static site, Tina schema, seed content, deploy workflow, handoff docs.
-2. Deploys run on every push to `main` via GitHub Actions → GitHub Pages; CI builds without Tina secrets.
+2. First deploy succeeded 2026-10-27 (Actions run #1): live at https://bromsc.github.io/spacecraft-site/. Every push to `main` redeploys; CI builds without Tina secrets.
 3. Not yet live on the domain: Tina Cloud is not configured and the custom domain/DNS is not set up.
 
 ## What exists
@@ -110,5 +110,5 @@ Nothing.
 ## Deploy URL
 
 - Production (once domain is set + DNS pointed): https://thespacecraft.se
-- Until then: https://bromsc.github.io/spacecraft-site/
+- Live now: https://bromsc.github.io/spacecraft-site/ (first deploy 2026-10-27, run #1 green; Tina step skipped as expected)
 - Deploy runs: https://github.com/BromsC/spacecraft-site/actions
