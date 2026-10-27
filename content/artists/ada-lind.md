@@ -1,7 +1,7 @@
 ---
 name: Ada Lind
 role: Light installation
-shortBio: TEST BLA BLA BLA
+shortBio: TEST BLA BLA BLA HEJ ANNE!!!!
 portrait: /uploads/ada-lind-portrait.svg
 gallery:
   - image: /uploads/ada-lind-work-1.svg
