@@ -1,7 +1,7 @@
 ---
 name: Ada Lind
 role: Light installation
-shortBio: Placeholder bio for Ada Lind. Replace with a short introduction.
+shortBio: TEST BLA BLA BLA
 portrait: /uploads/ada-lind-portrait.svg
 gallery:
   - image: /uploads/ada-lind-work-1.svg
@@ -10,7 +10,7 @@ gallery:
     caption: Placeholder work 2
 links:
   - label: Website
-    url: https://example.com/
+    url: 'https://example.com/'
 order: 1
 featured: true
 ---
