@@ -1,7 +1,8 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import ArtistFeature from '../../components/ArtistFeature.astro';
+import ArtistContinued from '../../components/ArtistContinued.astro';
 import { getArtists } from '../../lib/content';
 import { url } from '../../lib/url';
 
@@ -11,52 +12,25 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { artist } = Astro.props;
-const { name, role, shortBio, portrait, gallery, links } = artist.data;
-const { Content } = await render(artist);
+const { name, links } = artist.data;
 ---
 
-<Layout title={name} description={shortBio}>
-  <article class="container section">
-    <p><a href={url('/artists')}>← All artists</a></p>
-    <div class="split">
-      <div>
-        <h1>{name}</h1>
-        {role && <p class="muted">{role}</p>}
-        {shortBio && <p class="lead">{shortBio}</p>}
-        <div class="prose">
-          <Content />
-        </div>
-        {
-          links.length > 0 && (
-            <ul class="links">
-              {links.map((link) => (
-                <li>
-                  <a href={link.url} rel="noopener">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )
-        }
-      </div>
-      {portrait && <img class="portrait" src={url(portrait)} alt={`Portrait of ${name}`} width="800" height="1000" />}
-    </div>
-
+<Layout title={name}>
+  <ArtistFeature artist={artist} headingLevel={1}>
     {
-      gallery.length > 0 && (
-        <section class="section">
-          <h2>Works</h2>
-          <div class="gallery">
-            {gallery.map((item) => (
-              <figure>
-                <img src={url(item.image)} alt={item.caption ?? ''} loading="lazy" width="1200" height="800" />
-                {item.caption && <figcaption class="muted">{item.caption}</figcaption>}
-              </figure>
-            ))}
-          </div>
-        </section>
+      links.length > 0 && (
+        <ul class="links">
+          {links.map((link) => (
+            <li>
+              <a href={link.url} rel="noopener">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
       )
     }
-  </article>
+    <p class="back-link"><a href={url('/artists')}>← All exhibitions</a></p>
+  </ArtistFeature>
+  <ArtistContinued artist={artist} />
 </Layout>

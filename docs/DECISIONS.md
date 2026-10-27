@@ -152,3 +152,109 @@ Format: date · decision · why · alternatives rejected.
 - **Why:** A re-run executes against that run's original commit, so it redeploys old code. This
   happened once: re-running run #3 redeployed `efe3777` instead of the latest `main`.
 - **Rejected:** Re-running old runs as a "redeploy" shortcut.
+
+## 2026-10-27 — Design pass: white-only colour scheme
+
+- **Decision:** One colour scheme: white background (`--color-bg: #ffffff`), black text, one
+  accent `--color-accent: #0000ff` used only for the arrows. The `prefers-color-scheme` block and
+  the dark defaults are gone; `<meta name="color-scheme" content="light">`.
+- **Why:** The Figma mockup (`Otd6V0py66ddmBsxEBj3xE`) is white/black/blue only; the logo and
+  artworks are designed against white.
+- **Rejected:** Keeping a dark mode (no design for it; would need its own art direction). The
+  arrow SVG colour couldn't be read from Figma (the connector didn't return SVG content), so
+  `#0000FF` per the spec.
+
+## 2026-10-27 — Self-hosted ABC Areal Superfamily (variable)
+
+- **Decision:** Self-host `public/fonts/ABCArealSuperfamilyVariable.woff2` (licensed by The Space
+  Craft, uploaded by Caspar) as `font-family: 'ABC Areal'`, `font-weight: 400 700`, preloaded in
+  the layout. Declared twice from the same file: `font-style: normal` and
+  `font-style: oblique 12deg`. Italic text uses `font-style: oblique 12deg`. Fallback stack
+  `'ABC Areal', Helvetica, Arial, sans-serif`.
+- **Why:** The mockup's typeface. The font has a `slnt` axis (0…−12) but no `ital` axis; an
+  oblique face lets browsers drive `slnt` directly, so "Currently on view" and the phone header
+  use the font's own slanted design instead of a synthesised slant. One file, one download.
+- **Rejected:** A Google/Adobe font substitute (not the brand face); `font-variation-settings`
+  inside `@font-face` (not supported by Chromium); `font-style: italic` on the face (maps to an
+  `ital` axis the font doesn't have).
+
+## 2026-10-27 — Sticky header replaces nav and footer (supersedes "Nav 'Info' points to the About page")
+
+- **Decision:** Remove the header nav (Home / Artists / Info) and the footer. A fixed
+  `SiteHeader` shows three white pills — exhibition title, dates line, venue — all linking to
+  `#top`. On the home page it is hidden while `#intro`/`#landing` are in view and fades in after
+  `#landing`. Phone: title at the top, dates + venue fixed at the bottom. Site settings'
+  `socialLinks` and `footerText` stay in the schema but are unused for now.
+- **Why:** That is the mockup. The pills keep it legible over images.
+- **Rejected:** Keeping a nav alongside (not in the design); deleting `socialLinks`/`footerText`
+  (likely needed again; harmless to keep).
+
+## 2026-10-27 — `pages` collection removed
+
+- **Decision:** Delete the `pages` collection (Tina + Astro), `content/pages/`, and
+  `src/pages/[slug].astro` (the `/about` page).
+- **Why:** The design has no generic text pages and no nav to reach them; an unreachable About
+  page in the CMS would confuse editors.
+- **Rejected:** Keeping it "for later" (re-adding a collection is a documented 5-step job in
+  CLAUDE.md).
+
+## 2026-10-27 — Artist `status` select replaces `featured`
+
+- **Decision:** Artists get a required `status` string field with Tina `options`
+  (`current` / `upcoming` / `previous`, shown as a select; shape verified against the installed
+  `@tinacms/schema-tools` types, as tina.io was unreachable from the build sandbox). zod:
+  `z.enum([...])`. `featured`, `role`, `shortBio`, `portrait`, `gallery` are removed. The home
+  page's current artist is the first `current` artist by `order`. New artists default to
+  `upcoming` / image `left` via the collection's `defaultItem`.
+- **Why:** The site is organised around one current artist plus previous/upcoming lists; a
+  three-way status says that directly and a select prevents typos.
+- **Rejected:** Deriving status from dates (see next entry); a boolean `current` (can't separate
+  previous from upcoming).
+
+## 2026-10-27 — Free-text `period`, sorting by `order`
+
+- **Decision:** Each artist has a free-text `period` ("30 October – 6 November", "November
+  13th") shown as written; lists sort by the numeric `order` field. The exhibition gets a
+  free-text `datesLine`; `startDate`/`endDate` remain but aren't displayed.
+- **Why:** The mockup mixes date formats on purpose ("6 – 13 November", "November 13th"); typed
+  dates would force one format. Manual `order` keeps the editor in control.
+- **Rejected:** Start/end date fields per artist with automatic formatting and automatic status
+  switching (rigid formatting, needs a rebuild at midnight to switch status anyway).
+
+## 2026-10-27 — Two text fields instead of auto-flowing text
+
+- **Decision:** An artist's text is split by the editor into `body` ("Text", beside the main
+  image) and `continuedText` ("Text, continued", beside the second image in `#continued`).
+  `#continued` only renders if `continuedText` or `btsImage` is set. The continued text sits
+  under the main image's column and the second image on the other side (as in Figma frames
+  `35:16` → `42:145`).
+- **Why:** Matches the two mockup frames exactly and works without JavaScript or measuring text.
+- **Rejected:** Flowing one long text across both sections with CSS columns/regions or JS
+  (fragile across viewports, unpredictable breaks).
+
+## 2026-10-27 — Intro and header behaviour in vanilla JS
+
+- **Decision:** The intro (2 s logo, then smooth scroll to `#landing`, skipped on repeat
+  visits/reduced motion, cancelled by user input) is a small inline script in `index.astro`. The
+  header fade uses one IntersectionObserver on `#landing`, with the root extended far downwards
+  (and 1 px in at the top) so it flips exactly when `#landing` leaves the viewport upwards —
+  including instant jumps past it, which a plain observer misses.
+- **Why:** A few lines of code; no dependency; the page is fully usable without JS.
+- **Rejected:** Scroll libraries (GSAP ScrollTrigger, Lenis) — new dependencies for two small
+  behaviours; scroll-event listeners (more work per frame than an observer).
+
+## 2026-10-27 — `continuedText` stored as Markdown in frontmatter, rendered with `marked`
+
+- **Decision:** `continuedText` is a Tina `rich-text` field without `isBody`; Tina serialises it
+  to a Markdown string in the frontmatter (checked in `@tinacms/graphql`: every rich-text field
+  goes through `serializeMDX`). Astro reads it as `z.string().optional()` and renders it with
+  `marked` (`renderMarkdown()` in `src/lib/content.ts`).
+- **Why:** Editors get the same rich-text editor as the main text (bold, italic, links), and the
+  output keeps that formatting. `marked` is already installed as a transitive dependency
+  (`tinacms` → `mermaid` → `marked` 16), so no new dependency is added.
+- **Rejected:** Plain text with `white-space: pre-line` (Markdown syntax like `**bold**` from the
+  rich-text editor would show up literally); a second content collection for continued texts
+  (two files per artist); adding `marked` or `@astrojs/markdown-remark` to `package.json` (a new
+  dependency for something already present).
+- **Risk:** If a Tina update stops pulling in `marked`, `npm run build` fails with "Cannot find
+  package 'marked'". Then add `marked` to `package.json` and note it here.

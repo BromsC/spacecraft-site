@@ -1,6 +1,6 @@
 import { defineConfig, type Template } from 'tinacms';
 
-// Slugify helper used for filenames of list collections (artists, pages).
+// Slugify helper used for artist filenames.
 // The filename IS the URL slug: content/artists/jane-doe.md → /artists/jane-doe
 const slugify = (value?: string) =>
   (value ?? '')
@@ -67,14 +67,35 @@ export default defineConfig({
         ui: { allowedActions: { create: false, delete: false } },
         fields: [
           { type: 'string', name: 'title', label: 'Title', isTitle: true, required: true },
-          { type: 'string', name: 'subtitle', label: 'Subtitle' },
+          {
+            type: 'string',
+            name: 'datesLine',
+            label: 'Dates line',
+            description:
+              'Shown as written on the landing page and in the header, e.g. "30 October – 11 December 2026".',
+          },
           { type: 'datetime', name: 'startDate', label: 'Start date' },
           { type: 'datetime', name: 'endDate', label: 'End date' },
           { type: 'string', name: 'venue', label: 'Venue' },
-          { type: 'string', name: 'address', label: 'Address' },
-          { type: 'string', name: 'openingHours', label: 'Opening hours', ui: { component: 'textarea' } },
-          { type: 'image', name: 'heroImage', label: 'Hero image' },
-          { type: 'rich-text', name: 'body', label: 'Body', isBody: true },
+          {
+            type: 'string',
+            name: 'presentingPrefix',
+            label: '"Presenting" line prefix',
+            description:
+              'Followed by all artist names in sort order. Default: "Presenting exhibitions of works by".',
+          },
+          {
+            type: 'string',
+            name: 'currentLabel',
+            label: 'Label above the arrow',
+            description: 'Default: "Currently on view".',
+          },
+          {
+            type: 'image',
+            name: 'logo',
+            label: 'Logo',
+            description: 'Shown full-screen when the home page opens. Leave empty to skip the intro.',
+          },
         ],
       },
       {
@@ -82,6 +103,7 @@ export default defineConfig({
         label: 'Artists',
         path: 'content/artists',
         format: 'md',
+        defaultItem: () => ({ status: 'upcoming', imageSide: 'left' }),
         ui: {
           filename: {
             // Filename = URL slug. Generated from the name, editable on create.
@@ -90,27 +112,23 @@ export default defineConfig({
         },
         fields: [
           { type: 'string', name: 'name', label: 'Name', isTitle: true, required: true },
-          { type: 'string', name: 'role', label: 'Role / discipline' },
-          { type: 'string', name: 'shortBio', label: 'Short bio', ui: { component: 'textarea' } },
-          { type: 'image', name: 'portrait', label: 'Portrait' },
           {
-            type: 'object',
-            name: 'gallery',
-            label: 'Gallery',
-            list: true,
-            ui: { itemProps: (item) => ({ label: item?.caption || item?.image }) },
-            fields: [
-              { type: 'image', name: 'image', label: 'Image', required: true },
-              { type: 'string', name: 'caption', label: 'Caption' },
+            type: 'string',
+            name: 'status',
+            label: 'Status',
+            required: true,
+            description: 'Current = the artist on view now (shown on the home page).',
+            options: [
+              { value: 'current', label: 'Current' },
+              { value: 'upcoming', label: 'Upcoming' },
+              { value: 'previous', label: 'Previous' },
             ],
           },
           {
-            type: 'object',
-            name: 'links',
-            label: 'Links',
-            list: true,
-            ui: { itemProps: (item) => ({ label: item?.label }) },
-            fields: linkFields,
+            type: 'string',
+            name: 'period',
+            label: 'Period',
+            description: 'Shown as written, e.g. "30 October – 6 November".',
           },
           {
             type: 'number',
@@ -119,27 +137,31 @@ export default defineConfig({
             description: 'Lower numbers are listed first.',
           },
           {
-            type: 'boolean',
-            name: 'featured',
-            label: 'Featured on home page',
+            type: 'string',
+            name: 'imageSide',
+            label: 'Main image side',
+            options: [
+              { value: 'left', label: 'Left' },
+              { value: 'right', label: 'Right' },
+            ],
           },
-          { type: 'rich-text', name: 'body', label: 'Body', isBody: true },
-        ],
-      },
-      {
-        name: 'pages',
-        label: 'Pages',
-        path: 'content/pages',
-        format: 'md',
-        ui: {
-          filename: {
-            // Filename = URL slug: content/pages/about.md → /about
-            slugify: (values) => slugify(values?.title),
+          { type: 'image', name: 'mainImage', label: 'Main image' },
+          { type: 'rich-text', name: 'body', label: 'Text', isBody: true },
+          {
+            type: 'image',
+            name: 'btsImage',
+            label: 'Second image',
+            description: 'Shown next to "Text, continued", on the opposite side of the main image.',
           },
-        },
-        fields: [
-          { type: 'string', name: 'title', label: 'Title', isTitle: true, required: true },
-          { type: 'rich-text', name: 'body', label: 'Body', isBody: true },
+          { type: 'rich-text', name: 'continuedText', label: 'Text, continued' },
+          {
+            type: 'object',
+            name: 'links',
+            label: 'Links',
+            list: true,
+            ui: { itemProps: (item) => ({ label: item?.label }) },
+            fields: linkFields,
+          },
         ],
       },
     ],

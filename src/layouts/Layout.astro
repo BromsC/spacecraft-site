@@ -1,25 +1,19 @@
 ---
 import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
 import { getSiteSettings } from '../lib/content';
-import { stripBase, url } from '../lib/url';
+import { url } from '../lib/url';
 
 interface Props {
   title?: string;
   description?: string;
+  // Home page only: header hidden until #landing is scrolled past.
+  autohideHeader?: boolean;
 }
 
 const site = await getSiteSettings();
-const { title, description = site.tagline } = Astro.props;
+const { title, description = site.tagline, autohideHeader = false } = Astro.props;
 const pageTitle = title ? `${title} — ${site.siteTitle}` : site.siteTitle;
-
-const nav = [
-  { href: '/', label: 'Home' },
-  { href: '/artists', label: 'Artists' },
-  { href: '/about', label: 'Info' },
-];
-const path = stripBase(Astro.url.pathname);
-const isCurrent = (href: string) =>
-  href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
 ---
 
 <!doctype html>
@@ -31,50 +25,21 @@ const isCurrent = (href: string) =>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
-    <meta name="color-scheme" content="dark light" />
+    <link
+      rel="preload"
+      href={url('/fonts/ABCArealSuperfamilyVariable.woff2')}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <meta name="color-scheme" content="light" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
-      <div class="container site-header__inner">
-        <a class="site-title" href={url('/')}>{site.siteTitle}</a>
-        <nav aria-label="Main">
-          <ul class="nav">
-            {
-              nav.map((item) => (
-                <li>
-                  <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-                    {item.label}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
-      </div>
-    </header>
-
+    <SiteHeader autohide={autohideHeader} />
     <main id="main">
       <slot />
     </main>
-
-    <footer class="site-footer">
-      <div class="container site-footer__inner">
-        {site.footerText && <p>{site.footerText}</p>}
-        {
-          site.socialLinks.length > 0 && (
-            <ul class="social">
-              {site.socialLinks.map((link) => (
-                <li>
-                  <a href={link.url} rel="noopener">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )
-        }
-      </div>
-    </footer>
   </body>
 </html>

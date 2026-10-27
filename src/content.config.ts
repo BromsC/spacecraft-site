@@ -25,13 +25,13 @@ const exhibition = defineCollection({
   loader: glob({ pattern: 'current.md', base: './content/exhibition' }),
   schema: z.object({
     title: z.string(),
-    subtitle: z.string().optional(),
+    datesLine: z.string().optional(),
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),
     venue: z.string().optional(),
-    address: z.string().optional(),
-    openingHours: z.string().optional(),
-    heroImage: z.string().optional(),
+    presentingPrefix: z.string().default('Presenting exhibitions of works by'),
+    currentLabel: z.string().default('Currently on view'),
+    logo: z.string().optional(),
   }),
 });
 
@@ -39,23 +39,16 @@ const artists = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './content/artists' }),
   schema: z.object({
     name: z.string(),
-    role: z.string().optional(),
-    shortBio: z.string().optional(),
-    portrait: z.string().optional(),
-    gallery: z
-      .array(z.object({ image: z.string(), caption: z.string().optional() }))
-      .default([]),
-    links: z.array(link).default([]),
+    status: z.enum(['current', 'upcoming', 'previous']),
+    period: z.string().optional(),
     order: z.number().default(100),
-    featured: z.boolean().default(false),
+    imageSide: z.enum(['left', 'right']).default('left'),
+    mainImage: z.string().optional(),
+    btsImage: z.string().optional(),
+    // Tina rich-text stored in frontmatter as a Markdown string (the body is the other text field).
+    continuedText: z.string().optional(),
+    links: z.array(link).default([]),
   }),
 });
 
-const pages = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './content/pages' }),
-  schema: z.object({
-    title: z.string(),
-  }),
-});
-
-export const collections = { site, exhibition, artists, pages };
+export const collections = { site, exhibition, artists };

@@ -1,16 +1,18 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import ArtistCard from '../../components/ArtistCard.astro';
-import { getArtists } from '../../lib/content';
+import ExhibitionLists from '../../components/ExhibitionLists.astro';
+import { byStatus, getArtists } from '../../lib/content';
 
 const artists = await getArtists();
 ---
 
-<Layout title="Artists">
-  <section class="container section">
-    <h1>Artists</h1>
-    <div class="grid">
-      {artists.map((artist) => <ArtistCard artist={artist} />)}
-    </div>
-  </section>
+<Layout title="Exhibitions">
+  <h1 class="visually-hidden">Exhibitions</h1>
+  <ExhibitionLists
+    groups={[
+      { key: 'current', heading: 'Currently on view:', artists: byStatus(artists, 'current') },
+      { key: 'previous', heading: 'Previous exhibitions:', artists: byStatus(artists, 'previous') },
+      { key: 'upcoming', heading: 'Upcoming exhibitions:', artists: byStatus(artists, 'upcoming') },
+    ]}
+  />
 </Layout>

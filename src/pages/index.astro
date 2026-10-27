@@ -1,53 +1,110 @@
 ---
-import { render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import ArtistCard from '../components/ArtistCard.astro';
+import Arrow from '../components/Arrow.astro';
+import ArtistFeature from '../components/ArtistFeature.astro';
+import ArtistContinued from '../components/ArtistContinued.astro';
+import ExhibitionLists from '../components/ExhibitionLists.astro';
+import {
+  byStatus,
+  getArtists,
+  getCurrentArtist,
+  getExhibition,
+  presentingLine,
+  withPeriod,
+} from '../lib/content';
 import { url } from '../lib/url';
-import { formatDateRange, getArtists, getExhibition } from '../lib/content';
 
-const exhibition = await getExhibition();
-const { Content } = await render(exhibition);
-const ex = exhibition.data;
-const dates = formatDateRange(ex.startDate, ex.endDate);
-const featured = (await getArtists()).filter((a) => a.data.featured);
+const ex = await getExhibition();
+const artists = await getArtists();
+const current = getCurrentArtist(artists);
 ---
 
-<Layout>
-  <section class="hero">
-    {ex.heroImage && <img class="hero__image" src={url(ex.heroImage)} alt="" width="1600" height="900" />}
-    <div class="container hero__text">
-      <h1>{ex.title}</h1>
-      {ex.subtitle && <p class="hero__subtitle">{ex.subtitle}</p>}
-      {dates && <p class="muted">{dates}</p>}
-    </div>
-  </section>
-
-  <section class="container section">
-    <div class="split">
-      <div class="prose">
-        <Content />
-      </div>
-      <dl class="facts">
-        {ex.venue && (<><dt>Venue</dt><dd>{ex.venue}</dd></>)}
-        {ex.address && (<><dt>Address</dt><dd>{ex.address}</dd></>)}
-        {ex.openingHours && (<><dt>Opening hours</dt><dd class="pre-line">{ex.openingHours}</dd></>)}
-      </dl>
-    </div>
-  </section>
-
+<Layout autohideHeader>
   {
-    featured.length > 0 && (
-      <section class="container section">
-        <h2>Featured artists</h2>
-        <div class="grid">
-          {featured.map((artist) => (
-            <ArtistCard artist={artist} />
-          ))}
-        </div>
-        <p>
-          <a href={url('/artists')}>All artists →</a>
-        </p>
+    ex.logo && (
+      <section id="intro" class="intro">
+        <img class="intro__logo" src={url(ex.logo)} alt={ex.title} width="1494" height="840" />
       </section>
     )
   }
+
+  <section id="landing" class="landing">
+    <div class="landing__text">
+      <h1 class="landing__title">{ex.title}</h1>
+      {
+        (ex.datesLine || ex.venue) && (
+          <p class="landing__dates">
+            {ex.datesLine && withPeriod(ex.datesLine)}
+            {ex.datesLine && ex.venue && (<>{' '}<br /></>)}
+            {ex.venue && withPeriod(ex.venue)}
+          </p>
+        )
+      }
+      {artists.length > 0 && <p class="landing__presenting">{presentingLine(ex.presentingPrefix, artists)}</p>}
+    </div>
+    {
+      current && (
+        <a class="landing__current" href="#current">
+          <span class="landing__label">{ex.currentLabel}</span>
+          <Arrow direction="down" class="landing__arrow" />
+        </a>
+      )
+    }
+  </section>
+
+  {current && <ArtistFeature id="current" artist={current} />}
+  {current && <ArtistContinued id="continued" artist={current} />}
+
+  <ExhibitionLists
+    id="exhibitions"
+    groups={[
+      { key: 'previous', heading: 'Previous exhibitions:', artists: byStatus(artists, 'previous') },
+      { key: 'upcoming', heading: 'Upcoming exhibitions:', artists: byStatus(artists, 'upcoming') },
+    ]}
+  />
 </Layout>
+
+<script is:inline>
+  // Intro: show the logo for 2 s, then glide to #landing. Skipped on repeat visits in this tab,
+  // with reduced motion, or when the page was opened at an anchor / restored scroll position.
+  (function () {
+    var intro = document.getElementById('intro');
+    var landing = document.getElementById('landing');
+    if (!intro || !landing) return;
+    if (location.hash || window.scrollY > 0) return;
+
+    var KEY = 'spacecraftIntroSeen';
+    var seen = false;
+    try {
+      seen = sessionStorage.getItem(KEY) !== null;
+    } catch (e) {}
+    var markSeen = function () {
+      try {
+        sessionStorage.setItem(KEY, '1');
+      } catch (e) {}
+    };
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (seen || reduce) {
+      landing.scrollIntoView({ block: 'start', behavior: 'instant' });
+      markSeen();
+      return;
+    }
+
+    var events = ['wheel', 'touchmove', 'keydown', 'pointerdown'];
+    var cancel = function () {
+      clearTimeout(timer);
+      markSeen();
+      events.forEach(function (type) {
+        window.removeEventListener(type, cancel);
+      });
+    };
+    var timer = setTimeout(function () {
+      cancel();
+      landing.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }, 2000);
+    events.forEach(function (type) {
+      window.addEventListener(type, cancel, { passive: true });
+    });
+  })();
+</script>

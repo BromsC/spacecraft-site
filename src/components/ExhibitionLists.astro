@@ -1,0 +1,43 @@
+---
+import type { Artist } from '../lib/content';
+import { url } from '../lib/url';
+import Arrow from './Arrow.astro';
+
+// "Previous exhibitions:" / "Upcoming exhibitions:" (Figma "MacBook Pro 14 - 4").
+// Each row: name (link) → arrow → period. An empty group shows just its heading.
+interface Group {
+  key: 'current' | 'previous' | 'upcoming';
+  heading: string;
+  artists: Artist[];
+}
+
+interface Props {
+  groups: Group[];
+  id?: string;
+}
+
+const { groups, id } = Astro.props;
+---
+
+<section id={id} class="section lists">
+  {
+    groups.map((group) => (
+      <div class:list={['lists__group', `lists__group--${group.key}`]}>
+        <h2 class="lists__heading">{group.heading}</h2>
+        {group.artists.length > 0 && (
+          <ul class="lists__rows">
+            {group.artists.map((artist) => (
+              <li class="lists__row">
+                <a class="lists__name" href={url(`/artists/${artist.id}`)}>
+                  {artist.data.name}
+                </a>
+                <Arrow direction="right" class="lists__arrow" />
+                <span class="lists__period">{artist.data.period}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    ))
+  }
+</section>

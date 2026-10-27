@@ -1,6 +1,10 @@
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { marked } from 'marked';
 
 // Small data helpers so pages don't repeat collection plumbing.
+
+export type Artist = CollectionEntry<'artists'>;
+export type ArtistStatus = Artist['data']['status'];
 
 export async function getSiteSettings() {
   const entry = await getEntry('site', 'settings');
@@ -11,9 +15,10 @@ export async function getSiteSettings() {
 export async function getExhibition() {
   const entry = await getEntry('exhibition', 'current');
   if (!entry) throw new Error('Missing content/exhibition/current.md');
-  return entry;
+  return entry.data;
 }
 
+// All artists, sorted by `order` then name.
 export async function getArtists() {
   const artists = await getCollection('artists');
   return artists.sort(
@@ -21,16 +26,26 @@ export async function getArtists() {
   );
 }
 
-const dateFormat = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-  timeZone: 'Europe/Stockholm',
-});
+export function byStatus(artists: Artist[], status: ArtistStatus) {
+  return artists.filter((a) => a.data.status === status);
+}
 
-export function formatDateRange(start?: Date, end?: Date) {
-  if (start && end) return `${dateFormat.format(start)} – ${dateFormat.format(end)}`;
-  if (start) return `From ${dateFormat.format(start)}`;
-  if (end) return `Until ${dateFormat.format(end)}`;
-  return '';
+// The artist on view now: the first `current` artist by order, if any.
+export function getCurrentArtist(artists: Artist[]) {
+  return byStatus(artists, 'current')[0];
+}
+
+// "<prefix> A, B, C." — every artist name in sort order.
+export function presentingLine(prefix: string, artists: Artist[]) {
+  return `${prefix} ${artists.map((a) => a.data.name).join(', ')}.`;
+}
+
+// `continuedText` is Tina rich-text stored as a Markdown string in frontmatter (see DECISIONS.md).
+export function renderMarkdown(source: string) {
+  return marked.parse(source, { async: false });
+}
+
+// "Kista" → "Kista." (leaves text that already ends in punctuation alone).
+export function withPeriod(text: string) {
+  return /[.!?]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`;
 }
