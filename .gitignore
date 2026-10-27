@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+
+# Tina: generated client/types are rebuilt on every build.
+# tina/tina-lock.json IS committed (Tina Cloud reads the schema from it).
+tina/__generated__/
+# Tina admin SPA is built into public/admin by `tinacms build` in CI.
+public/admin/
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs / OS
+npm-debug.log*
+.DS_Store
