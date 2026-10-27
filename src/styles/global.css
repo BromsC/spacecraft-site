@@ -1,0 +1,302 @@
+/*
+  Global styles. Plain CSS + custom properties; no framework.
+  Design tokens live in :root — change them here first.
+*/
+
+:root {
+  --color-bg: #0e0f12;
+  --color-surface: #17191e;
+  --color-text: #f2efe8;
+  --color-muted: #a19d94;
+  --color-accent: #e8d6a8;
+  --color-border: #2a2d34;
+
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: var(--font-body);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --space-6: 4rem;
+
+  --container: 72rem;
+  --radius: 4px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-bg: #f7f5f0;
+    --color-surface: #ffffff;
+    --color-text: #16171a;
+    --color-muted: #5f5c55;
+    --color-accent: #7a5b12;
+    --color-border: #dedad1;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+main {
+  flex: 1;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  line-height: 1.15;
+  font-weight: 500;
+  margin: 0 0 var(--space-3);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+h2 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+.container {
+  width: min(100% - 2 * var(--space-3), var(--container));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: var(--space-5);
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.lead {
+  font-size: 1.2rem;
+}
+
+.pre-line {
+  white-space: pre-line;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose {
+  max-width: 40rem;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: var(--space-3);
+  top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  z-index: 10;
+}
+
+/* Header / footer */
+
+.site-header {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header__inner,
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--space-3);
+}
+
+.site-title {
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.nav,
+.social,
+.links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.nav a {
+  text-decoration: none;
+}
+
+.nav a[aria-current='page'] {
+  text-decoration: underline;
+}
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* Hero */
+
+.hero {
+  position: relative;
+  min-height: min(70vh, 40rem);
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+}
+
+.hero__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.hero__text {
+  padding-block: var(--space-6) var(--space-5);
+  color: #f2efe8;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.5);
+}
+
+.hero__text .muted {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.hero__subtitle {
+  font-size: 1.25rem;
+  margin: 0 0 var(--space-2);
+}
+
+/* Layout helpers */
+
+.split {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 48rem) {
+  .split {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.facts {
+  margin: 0;
+}
+
+.facts dt {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.facts dd {
+  margin: 0 0 var(--space-3);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  margin-bottom: var(--space-4);
+}
+
+.artist-card a {
+  display: block;
+  text-decoration: none;
+}
+
+.artist-card img {
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  width: 100%;
+  border-radius: var(--radius);
+  margin-bottom: var(--space-2);
+}
+
+.artist-card h3 {
+  margin: 0;
+}
+
+.artist-card p {
+  margin: 0;
+}
+
+.portrait {
+  border-radius: var(--radius);
+}
+
+.gallery {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+}
+
+.gallery figure {
+  margin: 0;
+}
+
+.gallery figcaption {
+  font-size: 0.9rem;
+  margin-top: var(--space-2);
+}

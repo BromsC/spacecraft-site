@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ArtistCard from '../../components/ArtistCard.astro';
+import { getArtists } from '../../lib/content';
+
+const artists = await getArtists();
+---
+
+<Layout title="Artists">
+  <section class="container section">
+    <h1>Artists</h1>
+    <div class="grid">
+      {artists.map((artist) => <ArtistCard artist={artist} />)}
+    </div>
+  </section>
+</Layout>

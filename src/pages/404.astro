@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { url } from '../lib/url';
+---
+
+<Layout title="Not found">
+  <section class="container section">
+    <h1>Not found</h1>
+    <p>That page doesn't exist. <a href={url('/')}>Back to the start</a>.</p>
+  </section>
+</Layout>

@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { url } from '../lib/url';
+
+interface Props {
+  artist: CollectionEntry<'artists'>;
+}
+
+const { artist } = Astro.props;
+const { name, role, portrait } = artist.data;
+---
+
+<article class="artist-card">
+  <a href={url(`/artists/${artist.id}`)}>
+    {
+      portrait && (
+        <img src={url(portrait)} alt={`Portrait of ${name}`} loading="lazy" width="800" height="1000" />
+      )
+    }
+    <h3>{name}</h3>
+    {role && <p class="muted">{role}</p>}
+  </a>
+</article>

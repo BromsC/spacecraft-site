@@ -1,0 +1,53 @@
+---
+import { render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import ArtistCard from '../components/ArtistCard.astro';
+import { url } from '../lib/url';
+import { formatDateRange, getArtists, getExhibition } from '../lib/content';
+
+const exhibition = await getExhibition();
+const { Content } = await render(exhibition);
+const ex = exhibition.data;
+const dates = formatDateRange(ex.startDate, ex.endDate);
+const featured = (await getArtists()).filter((a) => a.data.featured);
+---
+
+<Layout>
+  <section class="hero">
+    {ex.heroImage && <img class="hero__image" src={url(ex.heroImage)} alt="" width="1600" height="900" />}
+    <div class="container hero__text">
+      <h1>{ex.title}</h1>
+      {ex.subtitle && <p class="hero__subtitle">{ex.subtitle}</p>}
+      {dates && <p class="muted">{dates}</p>}
+    </div>
+  </section>
+
+  <section class="container section">
+    <div class="split">
+      <div class="prose">
+        <Content />
+      </div>
+      <dl class="facts">
+        {ex.venue && (<><dt>Venue</dt><dd>{ex.venue}</dd></>)}
+        {ex.address && (<><dt>Address</dt><dd>{ex.address}</dd></>)}
+        {ex.openingHours && (<><dt>Opening hours</dt><dd class="pre-line">{ex.openingHours}</dd></>)}
+      </dl>
+    </div>
+  </section>
+
+  {
+    featured.length > 0 && (
+      <section class="container section">
+        <h2>Featured artists</h2>
+        <div class="grid">
+          {featured.map((artist) => (
+            <ArtistCard artist={artist} />
+          ))}
+        </div>
+        <p>
+          <a href={url('/artists')}>All artists →</a>
+        </p>
+      </section>
+    )
+  }
+</Layout>
