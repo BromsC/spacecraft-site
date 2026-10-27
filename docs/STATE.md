@@ -5,7 +5,7 @@
 2026-10-27 — Design pass session (Claude Code): implemented the Figma mockup (file
 `Otd6V0py66ddmBsxEBj3xE` "Space Craft") — one long scrolling home page, sticky header, new
 exhibition/artist schema, real seed content. Pushed on branch
-`claude/spacecraft-figma-design-q886gh` with a PR to `main` (this environment can only push the
+`claude/spacecraft-figma-design-q886gh` with PR https://github.com/BromsC/spacecraft-site/pull/1 to `main` (this environment can only push the
 feature branch). **Not live until that PR is merged.**
 
 ## Status summary
