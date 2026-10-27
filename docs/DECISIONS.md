@@ -105,3 +105,20 @@ Format: date · decision · why · alternatives rejected.
 - **Why:** Spec asked for an "Info" nav item and an "about" seed page; one info page is enough
   until there is real content for separate Info/Visit pages.
 - **Rejected:** Separate empty Info and Visit pages (placeholder clutter).
+
+## 2026-10-27 — Pin @tinacms/cli 4.0.3 / @tinacms/graphql 4.0.1
+
+- **Decision:** `package.json` pins `@tinacms/cli` to exactly `4.0.3` and adds
+  `"overrides": { "@tinacms/graphql": "4.0.1" }`. `tina/tina-lock.json` was regenerated and now
+  records schema `fullVersion` `4.0.1`. `tinacms` stays at `^3.15.0` (installs cleanly with
+  cli 4.0.3; one copy of `@tinacms/graphql` in the tree).
+- **Why:** `@tinacms/graphql` 4.1.0 (published 2026-10-27) came in via `@tinacms/cli` 4.0.4 and
+  was written into `tina-lock.json`. Tina Cloud does not support it yet: `tinacms build` in CI
+  failed with "Invalid version 4.1.0 … ERR_CLOUD_CHECK_FAILED" (deploy run #3). The override is
+  needed because cli 4.0.3 declares `@tinacms/graphql` `^4.0.1`, which still resolves to 4.1.0.
+- **Rejected:** Waiting for Tina Cloud to support 4.1.0 (`/admin` stays down for an unknown
+  time); `tinacms build --skip-cloud-checks` (hides the mismatch — the admin would still talk to
+  a Tina Cloud that cannot index a 4.1.0 schema, and it would mask future real failures).
+- **Revisit:** When Tina Cloud supports graphql 4.1.0 (check Tina's changelog / release notes,
+  or try a build on a branch): restore `^` ranges, remove the override, reinstall, regenerate
+  `tina/tina-lock.json`, confirm CI is green. Until then don't bump these packages.

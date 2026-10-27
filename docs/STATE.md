@@ -2,13 +2,18 @@
 
 ## Last updated
 
-2026-10-27 — initial foundation session (Claude Code).
+2026-10-27 — Tina version-pin fix session (Claude Code).
 
 ## Status summary
 
 1. Foundation is built: Astro 7 static site, Tina schema, seed content, deploy workflow, handoff docs.
 2. First deploy succeeded 2026-10-27 (Actions run #1): live at https://bromsc.github.io/spacecraft-site/. Every push to `main` redeploys; CI builds without Tina secrets.
-3. Not yet live on the domain: Tina Cloud is not configured and the custom domain/DNS is not set up.
+3. Tina Cloud project exists (main indexed) and the repo secrets are set. Deploy run #3 (first
+   with secrets) failed at `npx tinacms build`: Tina Cloud rejected schema version 4.1.0
+   (`ERR_CLOUD_CHECK_FAILED`). Fixed by pinning `@tinacms/cli` 4.0.3 / `@tinacms/graphql` 4.0.1 and
+   regenerating `tina/tina-lock.json` (now `fullVersion` 4.0.1). `/admin` goes live on the next
+   green deploy.
+4. Not yet live on the domain: the custom domain/DNS is not set up.
 
 ## What exists
 
@@ -21,7 +26,7 @@
 | `/artists/[slug]` | `src/pages/artists/[slug].astro` | Artist detail: role, short bio, body, portrait, gallery, links |
 | `/[slug]` | `src/pages/[slug].astro` | Generic page from `content/pages/<slug>.md` (currently only `/about`) |
 | `/404` | `src/pages/404.astro` | Not-found page |
-| `/admin` | built by `tinacms build` | **Only exists once Tina secrets are set** |
+| `/admin` | built by `tinacms build` | Secrets set; **pending the first green deploy with the version-pin fix** |
 
 Shared shell: `src/layouts/Layout.astro` (nav: Home, Artists, Info → `/about`; footer text and
 social links from site settings).
@@ -54,12 +59,15 @@ Media: Tina repo-based media, uploads go to `public/uploads/` (served at `/uploa
 
 ## In progress
 
-Nothing.
+- Verify the first deploy after the Tina version-pin fix is green and `/admin` loads at
+  https://bromsc.github.io/spacecraft-site/admin/ (log in with the Tina Cloud account).
 
 ## Next steps
 
-1. Point the domain (Caspar, browser only — see "Environment / secrets status" for steps).
-2. Set up Tina Cloud and add the two repo secrets → `/admin` goes live on the next deploy.
+1. Confirm the deploy is green and `/admin` works (if the push landed on a PR branch, merge the
+   PR first — Actions deploys only from `main`).
+2. Point the domain (Caspar, browser only — see "Environment / secrets status" for steps), then
+   add `https://thespacecraft.se` to the Tina Cloud project's site URLs.
 3. Replace placeholder content with real exhibition/artist content (via `/admin` once live).
 4. Design pass: typography, colour tokens in `src/styles/global.css`, hero treatment.
 5. Later: first light visual as a client-only island in `src/components/visual/`.
@@ -74,7 +82,13 @@ Nothing.
 
 ## Known issues
 
-- `/admin` 404s until Tina Cloud secrets are added (expected).
+- `/admin` 404s until the first green deploy with the Tina version-pin fix.
+- **Tina packages are pinned:** `@tinacms/cli` exact `4.0.3` and `overrides` →
+  `@tinacms/graphql` `4.0.1` in `package.json`, because Tina Cloud rejects schema version 4.1.0.
+  Unpin (back to `^` ranges, remove the override, regenerate `tina/tina-lock.json`) once Tina
+  Cloud supports graphql 4.1.0 — see DECISIONS.md. Don't let Dependabot/`npm update` bump these.
+- `npm install` warns that `react-final-form` (inside `tinacms` 3.15.0) wants React ≤18; we use
+  React 19. Pre-existing, harmless for the build; the warning comes from Tina, not from us.
 - Images placed *inside* Markdown body text as `/uploads/...` won't render on the
   `bromsc.github.io/spacecraft-site/` preview URL (base-path prefix not applied there); they work
   on the custom domain. Frontmatter image fields work on both.
@@ -86,8 +100,9 @@ Nothing.
 | Item | Status |
 | --- | --- |
 | GitHub Pages source = "GitHub Actions" | ✅ done (per Caspar) |
-| Repo secret `TINA_CLIENT_ID` | ❌ not set — Tina Cloud project not created yet |
-| Repo secret `TINA_TOKEN` | ❌ not set |
+| Tina Cloud project | ✅ created from `BromsC/spacecraft-site`, branch `main` indexed; site URL `https://bromsc.github.io` |
+| Repo secret `TINA_CLIENT_ID` | ✅ set |
+| Repo secret `TINA_TOKEN` | ✅ set |
 | Custom domain in Settings → Pages | ❌ not set (required — GitHub ignores `public/CNAME` for Actions deploys) |
 | GoDaddy DNS → GitHub Pages | ❌ not pointed |
 
@@ -100,15 +115,13 @@ Nothing.
 4. Re-run the deploy workflow (Actions → Deploy to GitHub Pages → Run workflow) so the site is
    rebuilt for the root path.
 
-**To connect Tina Cloud (browser only):**
-1. app.tina.io → sign in with GitHub → create project from `BromsC/spacecraft-site`, branch `main`.
-2. Copy the Client ID and create a read-only content token.
-3. GitHub → Settings → Secrets and variables → Actions → add `TINA_CLIENT_ID` and `TINA_TOKEN`.
-4. Add `https://thespacecraft.se` (and the github.io URL if still used) to the project's site URLs.
-5. Re-run the deploy workflow; `/admin` will be built.
+**Tina Cloud (done except one step):** project created, secrets added. Remaining, once the
+domain is live: app.tina.io → the project → its settings → Site URLs → add
+`https://thespacecraft.se` → Save.
 
 ## Deploy URL
 
 - Production (once domain is set + DNS pointed): https://thespacecraft.se
-- Live now: https://bromsc.github.io/spacecraft-site/ (first deploy 2026-10-27, run #1 green; Tina step skipped as expected)
+- Live now: https://bromsc.github.io/spacecraft-site/ (runs #1–#2 green with Tina step skipped;
+  run #3, the first with Tina secrets, failed on the Tina Cloud version check — fixed by the pin)
 - Deploy runs: https://github.com/BromsC/spacecraft-site/actions
