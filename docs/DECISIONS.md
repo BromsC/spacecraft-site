@@ -122,3 +122,33 @@ Format: date · decision · why · alternatives rejected.
 - **Revisit:** When Tina Cloud supports graphql 4.1.0 (check Tina's changelog / release notes,
   or try a build on a branch): restore `^` ranges, remove the override, reinstall, regenerate
   `tina/tina-lock.json`, confirm CI is green. Until then don't bump these packages.
+
+## 2026-10-27 — Apex domain + www on GitHub Pages via GoDaddy A/AAAA/CNAME
+
+- **Decision:** Serve the site at the apex `thespacecraft.se` with `www` as the alternate name.
+  GoDaddy DNS (GoDaddy nameservers): four `A` records on `@` → `185.199.108–111.153`, four `AAAA`
+  records on `@` → `2606:50c0:8000–8003::153`, `CNAME` `www` → `bromsc.github.io`. GoDaddy's
+  "Parked" A record and the old `www` → `thespacecraft.se` CNAME were deleted; no forwarding.
+  Custom domain set in repo Settings → Pages, "Enforce HTTPS" on.
+- **Why:** This is GitHub's documented setup. Apex A/AAAA plus a `www` CNAME lets GitHub Pages
+  redirect between the two names itself and issue one certificate covering both.
+- **Rejected:** GoDaddy domain forwarding (would have fought the A records on `@`);
+  CNAME flattening / ALIAS records (not needed — GitHub publishes stable apex IPs).
+
+## 2026-10-27 — Tina git authoring: act as self
+
+- **Decision:** In the Tina Cloud project, Git authoring is set to "act as self": commits made
+  from `/admin` are authored by the logged-in editor's GitHub account (currently BromsC).
+- **Why:** Edits are attributable to the person who made them in git history. If the editor's
+  GitHub permissions are missing, Tina falls back to the `tina-cloud-app` bot automatically, so
+  saving never breaks.
+- **Rejected:** Bot-only commits (every content change shows as `tina-cloud-app`, no record of
+  who edited what).
+
+## 2026-10-27 — Deploy from "Run workflow", not "Re-run"
+
+- **Decision:** To redeploy the latest `main`, use Actions → "Deploy to GitHub Pages" →
+  **Run workflow** (on `main`). Never use "Re-run all jobs" on an old run.
+- **Why:** A re-run executes against that run's original commit, so it redeploys old code. This
+  happened once: re-running run #3 redeployed `efe3777` instead of the latest `main`.
+- **Rejected:** Re-running old runs as a "redeploy" shortcut.
