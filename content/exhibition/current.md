@@ -6,6 +6,6 @@ endDate: 2026-12-11T00:00:00.000Z
 venue: 'Jan Stenbecks torg, Kista'
 presentingPrefix: Presenting exhibitions of works by
 currentLabel: Currently on view
-logo: /uploads/LOGO-2.png
+logo: /uploads/LOGO.png
 ---
 
