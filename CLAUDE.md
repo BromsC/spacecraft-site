@@ -62,8 +62,8 @@ src/
   content.config.ts      # Astro collections — must mirror tina/config.ts
   lib/content.ts         # data helpers (getSiteSettings, getExhibition, getArtists, …)
   layouts/Layout.astro   # shared shell: <head>, font preload, sticky SiteHeader (no nav/footer)
-  components/            # .astro components (PascalCase): SiteHeader, ArtistFeature, ArtistContinued,
-                         #   ExhibitionLists, Arrow
+  components/            # .astro components (PascalCase): SiteHeader, ArtistFeature, ExhibitionLists,
+                         #   Arrow
   components/visual/     # client-only visual islands (Three.js etc. later)
   pages/                 # routes: index, artists/index, artists/[slug], 404
   styles/global.css      # design tokens (:root) + global styles

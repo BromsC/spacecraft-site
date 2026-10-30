@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
-import { getSiteSettings } from '../lib/content';
+import { getExhibition, getSiteSettings } from '../lib/content';
 import { url } from '../lib/url';
 
 interface Props {
@@ -12,8 +12,13 @@ interface Props {
 }
 
 const site = await getSiteSettings();
+const ex = await getExhibition();
 const { title, description = site.tagline, autohideHeader = false } = Astro.props;
 const pageTitle = title ? `${title} — ${site.siteTitle}` : site.siteTitle;
+// Absolute URLs for canonical / Open Graph (`site` is set in astro.config.mjs).
+const origin = Astro.site ?? Astro.url;
+const canonical = new URL(Astro.url.pathname, origin).href;
+const ogImage = ex.logo ? new URL(url(ex.logo), origin).href : undefined;
 ---
 
 <!doctype html>
@@ -23,7 +28,14 @@ const pageTitle = title ? `${title} — ${site.siteTitle}` : site.siteTitle;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     {description && <meta name="description" content={description} />}
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
     <link
       rel="preload"

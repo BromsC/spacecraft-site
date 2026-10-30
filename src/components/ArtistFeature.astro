@@ -3,7 +3,11 @@ import { render } from 'astro:content';
 import type { Artist } from '../lib/content';
 import { url } from '../lib/url';
 
-// Image on one side, name + period and body text on the other (Figma "MacBook Pro 14 - 3").
+// Main image + second image + name/period + the whole text (Figma "MacBook Pro 14 - 3" → "- 6").
+// Desktop: both images are floats in a flow-root box — the main image on `imageSide`, the second
+// image on the other side directly below it — so the text runs beside the main image, breaks at
+// its bottom edge and continues beside the second image ("clean cut", no JS). Phone: a grid
+// stacked with `order` (name, small square image, text, links, second image).
 interface Props {
   artist: Artist;
   id?: string;
@@ -13,18 +17,33 @@ interface Props {
 
 const { artist, id, headingLevel = 2 } = Astro.props;
 const Heading = headingLevel === 1 ? 'h1' : 'h2';
-const { name, period, mainImage, imageSide } = artist.data;
+const { name, period, mainImage, btsImage, imageSide } = artist.data;
 const { Content } = await render(artist);
 ---
 
 <section id={id} class:list={['section', 'feature', `feature--image-${imageSide}`]}>
+  {
+    mainImage && (
+      <img class="feature__image" src={url(mainImage)} alt={name} width="726" height="726" decoding="async" />
+    )
+  }
+  {
+    btsImage && (
+      <img
+        class="feature__second"
+        src={url(btsImage)}
+        alt={name}
+        width="720"
+        height="822"
+        loading="lazy"
+        decoding="async"
+      />
+    )
+  }
   <Heading class="feature__title">
     {name}
     {period && (<><br />{period}</>)}
   </Heading>
-  <div class="feature__media">
-    {mainImage && <img src={url(mainImage)} alt={name} width="726" height="726" />}
-  </div>
   <div class="feature__body prose">
     <Content />
     <slot />

@@ -258,3 +258,83 @@ Format: date · decision · why · alternatives rejected.
   dependency for something already present).
 - **Risk:** If a Tina update stops pulling in `marked`, `npm run build` fails with "Cannot find
   package 'marked'". Then add `marked` to `package.json` and note it here.
+
+## 2026-10-30 — One text field per artist, floats for the "clean cut" (supersedes "Two text fields instead of auto-flowing text" and "`continuedText` stored as Markdown in frontmatter, rendered with `marked`")
+
+- **Decision:** An artist has one rich-text field, the Markdown body ("Text"); `continuedText` is
+  removed from both schemas and migrated into the body (only `sabrina-gschwandtner.md` had it).
+  The `#continued` section and `ArtistContinued.astro` are gone. `ArtistFeature` is a
+  `display: flow-root` box on desktop: the main image floats on `imageSide`, the second image
+  floats on the other side with `clear` and no vertical margin, so its top edge is the main
+  image's bottom edge; title and text are normal flow and wrap around both. Phone: a grid stacked
+  with `order`. The "Text" toolbar is reduced to heading / bold / italic / link with one heading
+  level (`h3`); every heading level is styled the same in `.prose`. `marked` /
+  `renderMarkdown()` are removed.
+- **Why:** Editors write one text; the browser decides where it breaks, at any viewport width.
+  CSS floats give exactly the mockup's dynamic cut (text beside the main image, then beside the
+  second image on the other side) with no JavaScript and no measuring. One field also removes the
+  dependency on the transitive `marked` package.
+- **Rejected:** JS splitting of the text at the image edge (measures fonts and layout, breaks on
+  resize, flashes); CSS Regions (not supported by browsers); CSS multi-column (balances columns,
+  can't make text step from one side to the other at an image edge); keeping two fields (editors
+  must guess where the image ends).
+
+## 2026-10-30 — Loading overlay replaces the intro section (supersedes the intro part of "Intro and header behaviour in vanilla JS")
+
+- **Decision:** No `#intro` section and no auto-scroll. If the exhibition has a logo, the home
+  page renders a fixed white overlay (z-index above the header) with the logo, shown only when
+  `<html>` has the `js` class. On every load and reload: after the logo has loaded (capped at
+  2 s), it stays 800 ms, fades over 500 ms (`--fade-intro`), then is removed from the DOM
+  (`transitionend`, 1.5 s fallback). Reduced motion → removed immediately. No scroll lock, no
+  `sessionStorage`. The header observer on `#landing` is unchanged.
+- **Why:** The intro section plus scripted smooth scroll fought the user's own scrolling and
+  needed repeat-visit logic; an overlay over the landing page gives the same brand moment with
+  no layout to scroll past. Waiting for the logo to load avoids fading out an empty white screen
+  on a slow connection.
+- **Rejected:** Keeping the intro section; a CSS-only animation (can't remove the element from the
+  DOM or wait for the image); showing it once per session (asked for on every load).
+
+## 2026-10-30 — Header title links home on subpages (supersedes the "all linking to `#top`" part of "Sticky header replaces nav and footer")
+
+- **Decision:** The header title pill links to `url('/')` on every page except the home page,
+  where it stays `#top` (decided by the existing `autohide` prop, which only the home page sets).
+  Dates/venue pills stay `#top`. Artist pages' back link is "← Home" → `/` (was "← All
+  exhibitions" → `/artists`); the `/artists` route stays.
+- **Why:** There was no way home from subpages (open question from the design pass).
+- **Rejected:** A nav (not in the design); checking `Astro.url.pathname` (the prop already says
+  "this is home", and stays right if the base path changes).
+
+## 2026-10-30 — Placeholder row for empty exhibition lists
+
+- **Decision:** An empty Previous / Upcoming / Current group keeps its heading and shows one row
+  `"..."` → blue arrow → `"..."` (same grid and sizes as a real row, not a link).
+- **Why:** Figma frame 38:47 and the phone frame show it; a bare heading looked unfinished.
+- **Rejected:** Hiding empty groups; a sentence like "None yet".
+
+## 2026-10-30 — `footerText` reused as the credits line
+
+- **Decision:** The unused Site-settings field `footerText` is relabelled "Credits line" and
+  rendered centred at the bottom of the exhibition-lists section (home and `/artists`), which is
+  at least one screen tall on all viewports. Omitted when empty. Seeded with the festival credits.
+- **Why:** The mockup has exactly one such line; reusing the field avoids a schema migration and
+  keeps the stored content.
+- **Rejected:** A new `credits` field (one more field and an orphaned one); a site-wide footer
+  (the design has none).
+
+## 2026-10-30 — No `scroll-margin-top` on `#current` / `#exhibitions`
+
+- **Decision:** Not added, although it was requested in this round's quality pass.
+- **Why:** Both sections already begin with `--header-space` top padding, so an anchor jump puts
+  their content below the header already. With an extra scroll margin the jump to `#current` would
+  stop `--header-space` early, leaving `#landing`'s last pixels in view — the header observer then
+  keeps the home header hidden — and doubling the white gap.
+- **Rejected:** Adding it and removing the padding (changes the layout of every section).
+
+## 2026-10-30 — Smooth-scroll library (Lenis) considered and rejected for now
+
+- **Decision:** No smooth-scroll / scroll-jacking library. Native `scroll-behavior: smooth`
+  (only with `prefers-reduced-motion: no-preference`) stays as it is.
+- **Why:** The overlay removed the only scripted scroll; native scrolling is faster, accessible and
+  dependency-free.
+- **Rejected:** Lenis (new dependency, overrides native scrolling and its accessibility; revisit
+  only if a later visual design needs scroll-linked motion).

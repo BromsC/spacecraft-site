@@ -17,7 +17,7 @@ const site = defineCollection({
     siteTitle: z.string(),
     tagline: z.string().optional(),
     socialLinks: z.array(link).default([]),
-    footerText: z.string().optional(),
+    footerText: z.string().optional(), // "Credits line" under the exhibition lists
   }),
 });
 
@@ -45,8 +45,6 @@ const artists = defineCollection({
     imageSide: z.enum(['left', 'right']).default('left'),
     mainImage: z.string().optional(),
     btsImage: z.string().optional(),
-    // Tina rich-text stored in frontmatter as a Markdown string (the body is the other text field).
-    continuedText: z.string().optional(),
     links: z.array(link).default([]),
   }),
 });

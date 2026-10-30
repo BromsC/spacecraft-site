@@ -2,7 +2,6 @@
 import type { GetStaticPaths } from 'astro';
 import Layout from '../../layouts/Layout.astro';
 import ArtistFeature from '../../components/ArtistFeature.astro';
-import ArtistContinued from '../../components/ArtistContinued.astro';
 import { getArtists } from '../../lib/content';
 import { url } from '../../lib/url';
 
@@ -30,7 +29,6 @@ const { name, links } = artist.data;
         </ul>
       )
     }
-    <p class="back-link"><a href={url('/artists')}>← All exhibitions</a></p>
+    <p class="back-link"><a href={url('/')}>← Home</a></p>
   </ArtistFeature>
-  <ArtistContinued artist={artist} />
 </Layout>
