@@ -1,10 +1,12 @@
 ---
 import type { Artist } from '../lib/content';
+import { getSiteSettings } from '../lib/content';
 import { url } from '../lib/url';
 import Arrow from './Arrow.astro';
 
-// "Previous exhibitions:" / "Upcoming exhibitions:" (Figma "MacBook Pro 14 - 4").
-// Each row: name (link) → arrow → period. An empty group shows just its heading.
+// "Previous exhibitions:" / "Upcoming exhibitions:" (Figma "MacBook Pro 14 - 4", 38:47).
+// Each row: name (link) → arrow → period. An empty group shows a '"..." → "..."' placeholder row.
+// The Site settings "Credits line" (footerText) sits centred at the bottom of the section.
 interface Group {
   key: 'current' | 'previous' | 'upcoming';
   heading: string;
@@ -17,27 +19,37 @@ interface Props {
 }
 
 const { groups, id } = Astro.props;
+const { footerText: credits } = await getSiteSettings();
 ---
 
 <section id={id} class="section lists">
-  {
-    groups.map((group) => (
-      <div class:list={['lists__group', `lists__group--${group.key}`]}>
-        <h2 class="lists__heading">{group.heading}</h2>
-        {group.artists.length > 0 && (
+  <div class="lists__groups">
+    {
+      groups.map((group) => (
+        <div class:list={['lists__group', `lists__group--${group.key}`]}>
+          <h2 class="lists__heading">{group.heading}</h2>
           <ul class="lists__rows">
-            {group.artists.map((artist) => (
-              <li class="lists__row">
-                <a class="lists__name" href={url(`/artists/${artist.id}`)}>
-                  {artist.data.name}
-                </a>
+            {group.artists.length > 0 ? (
+              group.artists.map((artist) => (
+                <li class="lists__row">
+                  <a class="lists__name" href={url(`/artists/${artist.id}`)}>
+                    {artist.data.name}
+                  </a>
+                  <Arrow direction="right" class="lists__arrow" />
+                  <span class="lists__period">{artist.data.period}</span>
+                </li>
+              ))
+            ) : (
+              <li class="lists__row lists__row--empty">
+                <span class="lists__name">"..."</span>
                 <Arrow direction="right" class="lists__arrow" />
-                <span class="lists__period">{artist.data.period}</span>
+                <span class="lists__period">"..."</span>
               </li>
-            ))}
+            )}
           </ul>
-        )}
-      </div>
-    ))
-  }
+        </div>
+      ))
+    }
+  </div>
+  {credits?.trim() && <p class="lists__credits">{credits}</p>}
 </section>

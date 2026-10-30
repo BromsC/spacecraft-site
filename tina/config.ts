@@ -55,7 +55,14 @@ export default defineConfig({
             ui: { itemProps: (item) => ({ label: item?.label }) },
             fields: linkFields,
           },
-          { type: 'string', name: 'footerText', label: 'Footer text', ui: { component: 'textarea' } },
+          {
+            type: 'string',
+            name: 'footerText',
+            label: 'Credits line',
+            description:
+              'Shown centred at the bottom of the exhibition lists, e.g. "The festival is curated by The Space Craft and organized in collaboration with Centrum for AMP. Supported by Region Stockholm."',
+            ui: { component: 'textarea' },
+          },
         ],
       },
       {
@@ -94,7 +101,8 @@ export default defineConfig({
             type: 'image',
             name: 'logo',
             label: 'Logo',
-            description: 'Shown full-screen when the home page opens. Leave empty to skip the intro.',
+            description:
+              'Shown full-screen over the home page for a moment on every load. Leave empty to skip.',
           },
         ],
       },
@@ -146,14 +154,26 @@ export default defineConfig({
             ],
           },
           { type: 'image', name: 'mainImage', label: 'Main image' },
-          { type: 'rich-text', name: 'body', label: 'Text', isBody: true },
+          {
+            type: 'rich-text',
+            name: 'body',
+            label: 'Text',
+            isBody: true,
+            description: "Sub-headings (e.g. 'About the works:') are headings in the editor.",
+            // One heading level only: h3 sits below the artist name (h1 on the artist page, h2 on
+            // the home page). All headings in the text are styled the same anyway.
+            overrides: {
+              toolbar: ['heading', 'bold', 'italic', 'link'],
+              headingLevels: ['h3'],
+            },
+          },
           {
             type: 'image',
             name: 'btsImage',
             label: 'Second image',
-            description: 'Shown next to "Text, continued", on the opposite side of the main image.',
+            description:
+              'Shown on the opposite side of the main image, directly below it. Text flows around both.',
           },
-          { type: 'rich-text', name: 'continuedText', label: 'Text, continued' },
           {
             type: 'object',
             name: 'links',

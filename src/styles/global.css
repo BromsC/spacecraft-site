@@ -35,8 +35,10 @@
   --fs-landing-presenting: clamp(20px, 3.175vw, 48px);
   --fs-label: clamp(24px, 3.175vw, 48px);
   --fs-heading: clamp(32px, 3.175vw, 48px);
+  --fs-subheading: clamp(20px, 2.116vw, 32px);
   --fs-row: clamp(16px, 2.116vw, 32px);
   --fs-body: clamp(16px, 1.587vw, 24px);
+  --fs-credits: clamp(16px, 1.852vw, 28px);
   --fs-header: 12px;
 
   /* Spacing */
@@ -49,6 +51,7 @@
   --arrow-right: clamp(37px, 7.209vw, 109px);
   --section-end: 48px;
   --fade: 300ms;
+  --fade-intro: 500ms;
 }
 
 @media (min-width: 48rem) {
@@ -99,6 +102,11 @@ a {
   text-underline-offset: 0.15em;
 }
 
+a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 h1,
 h2,
 h3 {
@@ -119,6 +127,20 @@ p {
 .prose ul,
 .prose ol {
   margin: 0;
+}
+
+/* Sub-headings in the text ("About the works:"). Every level looks the same; no `clear`, so they
+   wrap around the artist images like paragraphs. */
+.prose :is(h1, h2, h3, h4, h5, h6) {
+  margin: 1em 0 0.3em;
+  font-size: var(--fs-subheading);
+  font-weight: 700;
+  font-style: oblique 12deg;
+  line-height: normal;
+}
+
+.prose > :first-child {
+  margin-top: 0;
 }
 
 .visually-hidden {
@@ -247,26 +269,30 @@ p {
   padding: var(--header-space) var(--gutter) var(--section-end);
 }
 
-@media (min-width: 48rem) {
-  .feature,
-  .continued,
-  .lists {
-    min-height: 100vh;
-    min-height: 100svh;
-  }
+/* Loading overlay (home page): logo over everything for a moment, then fades out (index.astro).
+   Only with JS — the script is what removes it. */
+
+.loader {
+  display: none;
 }
 
-/* #intro: logo only */
-
-.intro {
+.js .loader {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
   display: grid;
   place-items: center;
-  min-height: 100vh;
-  min-height: 100svh;
-  padding: 0 var(--gutter) 30svh;
+  padding-inline: var(--gutter);
+  background: var(--color-bg);
+  transition: opacity var(--fade-intro) ease;
 }
 
-.intro__logo {
+.js .loader.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader__logo {
   width: 100%;
   max-width: 1494px;
   max-height: 100svh;
@@ -274,8 +300,14 @@ p {
 }
 
 @media (min-width: 48rem) {
-  .intro {
-    padding: 0;
+  .js .loader {
+    padding-inline: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .loader {
+    display: none;
   }
 }
 
@@ -330,71 +362,84 @@ p {
   width: calc(var(--arrow-down) * 60 / 110);
 }
 
-/* #current / artist page: image + name/period + text */
+/* #current / artist page: main image, second image, name/period, the whole text */
 
+/* Phone: one column, stacked with `order`. */
 .feature {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas:
-    'title'
-    'media'
-    'body';
   align-content: start;
 }
 
 .feature__title {
-  grid-area: title;
+  order: 1;
   font-size: var(--fs-heading);
   font-weight: 700;
   text-align: center;
 }
 
-.feature__media {
-  grid-area: media;
+.feature__image {
+  order: 2;
   justify-self: center;
   width: 133px;
   margin-top: 17px;
-}
-
-.feature__media img,
-.continued__media img {
-  width: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
 }
 
-.feature__media img {
-  aspect-ratio: 1;
-}
-
 .feature__body {
-  grid-area: body;
+  order: 3;
   margin-top: 26px;
 }
 
+.feature__second {
+  order: 4;
+  width: 100%;
+  margin-top: 26px;
+  aspect-ratio: 720 / 822;
+  object-fit: cover;
+}
+
+/* Desktop: both images float (main on imageSide, second on the other side, its top edge exactly at
+   the main image's bottom edge), the title and text flow around them. flow-root contains the
+   floats; `order` is ignored here. */
 @media (min-width: 48rem) {
   .feature {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto 1fr;
-    column-gap: var(--col-gap);
-    grid-template-areas:
-      'media title'
-      'media body';
+    display: flow-root;
   }
 
-  .feature--image-right {
-    grid-template-areas:
-      'title media'
-      'body media';
+  .feature__image,
+  .feature__second {
+    width: calc(50% - var(--col-gap) / 2);
+    margin: 0;
+  }
+
+  .feature__image {
+    float: left;
+    margin-right: var(--col-gap);
+  }
+
+  .feature__second {
+    float: right;
+    clear: left;
+    margin-left: var(--col-gap);
+  }
+
+  .feature--image-right .feature__image {
+    float: right;
+    margin-right: 0;
+    margin-left: var(--col-gap);
+  }
+
+  .feature--image-right .feature__second {
+    float: left;
+    clear: right;
+    margin-left: 0;
+    margin-right: var(--col-gap);
   }
 
   .feature__title {
     text-align: left;
-  }
-
-  .feature__media {
-    justify-self: stretch;
-    width: auto;
-    margin-top: 0;
   }
 
   .feature__body {
@@ -412,44 +457,30 @@ p {
   margin-top: 2em;
 }
 
-/* #continued: more text + second image */
-
-.continued {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  row-gap: 26px;
-  align-content: start;
-}
-
-.continued__media img {
-  aspect-ratio: 720 / 822;
-}
-
-@media (min-width: 48rem) {
-  .continued {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: var(--col-gap);
-    align-items: start;
-  }
-
-  .continued--text-right .continued__body {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .continued--text-right .continued__media {
-    grid-column: 1;
-    grid-row: 1;
-  }
-}
-
-/* #exhibitions: previous / upcoming lists */
+/* #exhibitions: previous / upcoming lists, credits line at the bottom of the screen */
 
 .lists {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  row-gap: 48px;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.lists__groups {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   row-gap: 48px;
   align-content: start;
+}
+
+.lists__credits {
+  align-self: end;
+  max-width: 1240px;
+  margin-inline: auto;
+  font-size: var(--fs-credits);
+  font-weight: 400;
+  text-align: center;
 }
 
 .lists__group--current {
@@ -498,7 +529,7 @@ p {
 }
 
 @media (min-width: 48rem) {
-  .lists {
+  .lists__groups {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: var(--col-gap);
   }

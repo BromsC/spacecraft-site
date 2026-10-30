@@ -1,17 +1,21 @@
 ---
 import { getExhibition, withPeriod } from '../lib/content';
+import { url } from '../lib/url';
 
 interface Props {
-  // Home page: hidden while #intro / #landing are in view, fades in once #landing is scrolled past.
+  // Home page: hidden while #landing is in view, fades in once #landing is scrolled past.
   autohide?: boolean;
 }
 
 const { autohide = false } = Astro.props;
 const ex = await getExhibition();
+// Only the home page has an autohiding header: there the title scrolls to the top, elsewhere it
+// leads home.
+const titleHref = autohide ? '#top' : url('/');
 ---
 
 <header class="site-header" data-autohide={autohide ? '' : undefined}>
-  <a class="site-header__item site-header__title" href="#top"><span class="pill">{ex.title}</span></a>
+  <a class="site-header__item site-header__title" href={titleHref}><span class="pill">{ex.title}</span></a>
   <div class="site-header__meta">
     {
       ex.datesLine && (

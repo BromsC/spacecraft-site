@@ -1,5 +1,4 @@
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
-import { marked } from 'marked';
 
 // Small data helpers so pages don't repeat collection plumbing.
 
@@ -38,11 +37,6 @@ export function getCurrentArtist(artists: Artist[]) {
 // "<prefix> A, B, C." — every artist name in sort order.
 export function presentingLine(prefix: string, artists: Artist[]) {
   return `${prefix} ${artists.map((a) => a.data.name).join(', ')}.`;
-}
-
-// `continuedText` is Tina rich-text stored as a Markdown string in frontmatter (see DECISIONS.md).
-export function renderMarkdown(source: string) {
-  return marked.parse(source, { async: false });
 }
 
 // "Kista" → "Kista." (leaves text that already ends in punctuation alone).
