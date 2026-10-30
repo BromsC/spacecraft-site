@@ -4,7 +4,7 @@ status: current
 period: 30 October – 6 November
 order: 1
 imageSide: left
-mainImage: /uploads/Roni-1.png
+mainImage: /uploads/2160Sabrina.png
 btsImage: /uploads/Photo-Joshua_White-jwpictures.com-9991.jpg
 ---
 
