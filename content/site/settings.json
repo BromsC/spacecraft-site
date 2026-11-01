@@ -1,8 +1,11 @@
 {
   "siteTitle": "The Space Craft",
-  "tagline": "An ongoing exhibition in Stockholm",
+  "tagline": "Exhibition platform for Contemporary Craft in Stockholm",
   "socialLinks": [
-    { "label": "Instagram", "url": "https://instagram.com/" }
+    {
+      "label": "Instagram",
+      "url": "https://instagram.com/spacecraft_exhibitions"
+    }
   ],
   "footerText": "The festival is curated by The Space Craft and organized in collaboration with Centrum for AMP. Supported by Region Stockholm."
 }
