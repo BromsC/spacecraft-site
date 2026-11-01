@@ -6,7 +6,7 @@ order: 2
 imageSide: left
 ---
 
-LIFE ON VENUS – Celestial Body är en utställning där den feministiska konstnärsgruppen BOOM! låter glaset möta science fiction.
+*LIFE ON VENUS – Celestial Body* är en utställning där den feministiska konstnärsgruppen BOOM! låter glaset möta science fiction.
 
 \
 Med utgångspunkt i kvinnokroppen och himlakroppen Venus, den planet som traditionellt förknippas med kvinnlighet, sätter BOOM! in flera verk kopplade till teknik och kropp i en kosmisk kontext, där kvinnlig gemenskap står i centrum; en sororocentrisk världsbild där allt kretsar runt systerskapet.
@@ -14,7 +14,7 @@ Med utgångspunkt i kvinnokroppen och himlakroppen Venus, den planet som traditi
 \
 Genom skulptur, objekt och film tar BOOM! sig an kvinnokroppens symbolik. De problematiserar hur den objektifieras och liksom i tidigare arbeten diskuterar de den kvinnliga kroppens handlingsutrymme med syfte att expandera det. Verken presenteras delvis i blacklight som symboliserar mörk energi, den mystiska kraft som driver på och accelererar universums expansion.
 
-LIFE ON VENUS – Celestial Body is an exhibition in which the feminist art collective BOOM! brings glass into dialogue with science fiction.
+*LIFE ON VENUS – Celestial Body* is an exhibition in which the feminist art collective BOOM! brings glass into dialogue with science fiction.
 
 \
 Taking the female body and the celestial body Venus—the planet traditionally associated with femininity—as its starting points, BOOM! places several works exploring the relationship between technology and the body within a cosmic context. At the heart of this universe is female solidarity: a sororocentric worldview in which everything revolves around sisterhood.
