@@ -7,7 +7,7 @@ imageSide: left
 mainImage: /uploads/2160Sabrina.png
 btsImage: /uploads/Photo-Joshua_White-jwpictures.com-9991.jpg
 btsCaption: |
-  *CAPTIONS HERE!!!*
+  Image features …, 2017. Photo by …CAPTIONS HERE!!!
 links:
   - {}
 ---
