@@ -6,6 +6,8 @@ order: 1
 imageSide: left
 mainImage: /uploads/2160Sabrina.png
 btsImage: /uploads/Photo-Joshua_White-jwpictures.com-9991.jpg
+btsCaption: |
+  *CAPTIONS HERE!!!*
 links:
   - {}
 ---
@@ -15,7 +17,7 @@ Sabrina Gschwandtner (USA) is a visual artist and filmmaker. Two works by the ar
 ### About the works:
 
 “Hand-painted Serpentine Dance”, 2021. \
-4k video, color, silent, 1:12 mins (loops). 
+4k video, color, silent, 1:12 mins (loops).
 
 \
 Sabrina Gschwandtner uses Alice Guy-Blaché’s 1897 film of Mrs. Bob Walter performing Loie Fuller’s Serpentine Dance to address the double erasure of Guy-Blaché, an under-recognized filmmaker, and Fuller, whose dance could not be copyrighted and was widely imitated. Gschwandtner’s video quilt uses diagonal seams to amplify the organic forms of the dancer’s billowing fabric, while digitally coloring her dress frame by frame in reference to early hand-colored films.
