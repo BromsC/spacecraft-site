@@ -1,4 +1,5 @@
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { Marked } from 'marked';
 
 // Small data helpers so pages don't repeat collection plumbing.
 
@@ -42,4 +43,19 @@ export function presentingLine(prefix: string, artists: Artist[]) {
 // "Kista" → "Kista." (leaves text that already ends in punctuation alone).
 export function withPeriod(text: string) {
   return /[.!?]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`;
+}
+
+// Markdown caption (Tina rich-text stored in frontmatter, e.g. `btsCaption`) → HTML.
+// Inline formatting only (bold, italic, links, line breaks): each blank-line-separated block is
+// rendered with parseInline and wrapped in <p>, so headings/lists typed by hand stay plain text.
+// Returns undefined for a missing or blank value (Tina may write an empty string).
+const captionMarked = new Marked({ gfm: true });
+
+export function renderCaption(markdown?: string) {
+  const text = markdown?.trim();
+  if (!text) return undefined;
+  return text
+    .split(/\n\s*\n/)
+    .map((block) => `<p>${captionMarked.parseInline(block.trim(), { async: false })}</p>`)
+    .join('');
 }

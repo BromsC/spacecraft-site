@@ -2,24 +2,29 @@
 
 ## Last updated
 
-2026-10-30 — Design-fix round (Claude Code): one text field per artist flowing around both
-images, empty-list placeholder rows + credits line, header title → home on subpages, "← Home" on
-artist pages, loading-logo overlay instead of the intro section, small quality pass (OG meta,
-focus outlines, image attributes). Pushed on branch `claude/eager-ride-of8ykd` with a PR to
+2026-11-02 — Design-fix round 2 (Claude Code): the artist block is one centred column on every
+viewport (no floats), phone content padding 20 px, new "Second image caption" field, and a
+build fix for empty link items. Pushed on branch `claude/festive-planck-vjztn2` with a PR to
 `main` (this environment can only push the feature branch). **Not live until that PR is
 merged.**
 
 ## Status summary
 
-1. The Figma design pass (PR https://github.com/BromsC/spacecraft-site/pull/1) is **merged and
-   live** on https://thespacecraft.se. Since then Caspar has uploaded the logo and Sabrina
-   Gschwandtner's images/text via `/admin` ("TinaCMS content update" / "Update from TinaCMS"
-   commits); all those deploys are green.
-2. This round's changes are code-complete on `claude/eager-ride-of8ykd`: `npm run build:site` and
-   `npx astro check` pass with 0 errors, 0 warnings, 0 hints. Checked in headless Chromium at
-   1512×982 and 390×844 with test content (not committed) — see "Verified" below.
-3. **The Tina schema changed** (artist `continuedText` removed, `body` toolbar reduced, labels):
-   the first deploy after merging must be checked (see "What Caspar must do" step 1).
+1. PR https://github.com/BromsC/spacecraft-site/pull/2 (design-fix round 1: one text field,
+   loading overlay, list placeholders, credits line) was **merged on 2026-10-30 and is live**.
+   Sabrina Gschwandtner's text has since been cleaned up in `/admin`: it appears once, with
+   `###` sub-headings ("About the works:", "About the artist:").
+2. **`main` is currently red:** deploy run #35 (2026-11-01 20:46 UTC, "TinaCMS content update",
+   `9f55bf5`) failed in the Astro build. That `/admin` save added an empty item to Sabrina's
+   **Links** (`links: - {}`), which the schema rejected. The site is still serving run #34
+   (`36ae034`, green), so the last edit — the line "Image features “Hands at Work Video”, 2017.
+   Photo by Joshua White Photography." appended to Sabrina's text — is not live yet. This
+   round's PR fixes the build (empty link items are now ignored); merging it deploys everything.
+3. This round is code-complete on `claude/festive-planck-vjztn2`: `npm run build:site` and
+   `npx astro check` pass with 0 errors, 0 warnings, 0 hints. Checked in headless Chromium
+   at 1512×982 and 390×844 with test content (not committed); see "Verified" below.
+4. **The Tina schema changed** (new field `btsCaption`, new descriptions on `btsImage` and
+   `imageSide`), so check the first deploy after merging ("What Caspar must do" step 1).
 
 ## What exists
 
@@ -27,14 +32,11 @@ merged.**
 
 | Route | Source | Content |
 | --- | --- | --- |
-| `/` | `src/pages/index.astro` | Loading overlay (logo, only if set) → `#landing` (title, dates + venue, "Presenting…" line, "Currently on view" + down arrow) → `#current` (current artist, whole text around both images) → `#exhibitions` (Previous / Upcoming lists + credits line) |
-| `/artists` | `src/pages/artists/index.astro` | "Currently on view:", "Previous exhibitions:", "Upcoming exhibitions:" lists + credits line. Not linked from anywhere any more, but kept. |
-| `/artists/[slug]` | `src/pages/artists/[slug].astro` | Artist block (images + name/period + text + links + "← Home") |
+| `/` | `src/pages/index.astro` | Loading overlay (logo, only if set) → `#landing` (title, dates + venue, "Presenting…" line, "Currently on view" + down arrow) → `#current` (current artist block) → `#exhibitions` (Previous / Upcoming lists + credits line) |
+| `/artists` | `src/pages/artists/index.astro` | "Currently on view:", "Previous exhibitions:", "Upcoming exhibitions:" lists + credits line. Not linked from anywhere, but kept. |
+| `/artists/[slug]` | `src/pages/artists/[slug].astro` | Artist block + links + "← Home" |
 | `/404` | `src/pages/404.astro` | "Nothing here." + "Back to the start" |
 | `/admin` | built by `tinacms build` in CI | Tina Cloud login |
-
-Removed this round: the `#intro` section (replaced by the overlay), the `#continued` section and
-`src/components/ArtistContinued.astro`.
 
 ### Shared pieces
 
@@ -46,19 +48,37 @@ Removed this round: the `#intro` section (replaced by the overlay), the `#contin
   line (centre), venue (right). Home page: hidden while `#landing` is in view, fades in (300 ms)
   once `#landing` is scrolled past (IntersectionObserver); all three pills link to `#top`. Every
   other page: always visible; the **title links to `/`**, dates/venue to `#top`. Phone
-  (< 48rem): title at the top, dates + venue in a fixed line at the bottom, 12 px Medium Italic.
-- `src/components/ArtistFeature.astro` — used by `#current` and `/artists/[slug]`. DOM order:
-  main image, second image, title (name + period), `.prose` body (+ slot for links / "← Home").
-  - Desktop (≥ 48rem): `display: flow-root`. Main image floats on `imageSide` (square, half width
-    minus half the column gap); the second image floats on the other side with `clear`, so its
-    top edge is exactly the main image's bottom edge (720 × 822 crop). Title and text are normal
-    flow: the text runs beside the main image, breaks at its bottom edge and continues on the
-    other side beside the second image, then full width if it is longer than both. No JS.
-  - Phone: grid with `order` — name/period centred → 133 px square main image → text → links →
-    second image full width (26 px gaps).
-  - Sub-headings in the text (any heading level) are bold oblique, `--fs-subheading`, and wrap
-    around the images like paragraphs. Paragraphs have no margins (blank lines come from the
-    editor).
+  (< 48rem): title at the top, dates + venue in a fixed line at the bottom, 12 px Medium Italic,
+  5 px from the edge (`--gutter`).
+- `src/components/ArtistFeature.astro` — the artist block, used by `#current` and
+  `/artists/[slug]` (same output on both). **One centred column on every viewport, no floats,
+  no JS.**
+  - DOM: main image, second image, caption, title (name + period), `.feature__body.prose` (the
+    rendered Markdown), `.feature__extra` (the slot: links + "← Home" on artist pages; only
+    rendered if the slot has content).
+  - `.feature` is a one-column grid; `.feature__body` is `display: contents`, so each paragraph
+    and heading of the text is its own grid item. Visual order via CSS `order`:
+    1 title · 2 intro (text before the first sub-heading) · 3 main image · 4 rest of the text
+    (first sub-heading onwards) · 5 second image · 6 caption · 7 links / back link.
+    The intro is selected with `:has()`; **if the text has no sub-heading, the main image goes
+    after the first paragraph.** If the text starts with a sub-heading, the intro is empty and the
+    main image comes right after the title.
+  - Desktop (≥ 48rem): column `width: min(100%, var(--feature-col))` (710 px), `justify-self:
+    center` — title, every text item, both images and the caption share the same left/right
+    edges, centred in the viewport. Title left-aligned. Gaps: title → intro
+    `clamp(32px, 6.3vw, 95px)` (the old body margin); main image 26 px above and below (square,
+    full column width); second image 26 px below the text (720 / 822 crop, full column width);
+    caption 8 px below it.
+  - Phone: same order. Title centred, 17 px to the intro; main image 133 px square, centred,
+    26 px above and below; second image full column width (720 / 822), 26 px below the text;
+    caption 8 px below.
+  - The first sub-heading's own top margin is 0 (the main image's 26 px is the gap); later
+    sub-headings keep their `1em` top / `0.3em` bottom margins. `.prose > :first-child` still
+    zeroes the first text item's top margin.
+  - `imageSide` is no longer used by the layout (still in both schemas and the content).
+  - Caption (`.feature__caption.prose`): `btsCaption` rendered to inline HTML; only shown if
+    `btsImage` is set and the caption is non-empty after trimming. `--fs-body`, left-aligned,
+    paragraphs without margins; italics only where the editor set them (`<em>` → oblique font).
 - `src/components/ExhibitionLists.astro` — headings + rows: underlined name link → blue arrow →
   period. An empty group shows one placeholder row `"..."` → arrow → `"..."` (not a link). The
   Site settings **Credits line** (`footerText`) sits centred at the bottom of the section
@@ -67,20 +87,30 @@ Removed this round: the `#intro` section (replaced by the overlay), the `#contin
 - `src/components/Arrow.astro` — inline SVG, `direction` `right|down`, stroke `currentColor`
   (accent token).
 - Loading overlay — `index.astro`: a fixed white layer (z-index 30, above the header) with the
-  logo centred, `aria-hidden`. On every load and reload: once the logo has loaded (at most 2 s),
-  it stays 800 ms, fades out over 500 ms (`--fade-intro`), then is removed from the DOM
-  (`transitionend`, 1.5 s fallback). Reduced motion → removed immediately (and hidden by CSS).
-  Only shown with JS (`.js .loader`), so no-JS visitors never get stuck. Scrolling is not locked.
+  logo centred, `aria-hidden`. On every load: once the logo has loaded (at most 2 s), it stays
+  800 ms, fades out over 500 ms (`--fade-intro`), then is removed from the DOM. Reduced motion →
+  removed immediately. Only shown with JS. Scrolling is not locked.
+- `src/lib/content.ts` — data helpers, plus `renderCaption()` (Markdown → inline HTML with
+  `marked.parseInline`, each blank-line-separated block wrapped in `<p>`).
 
 ### Design tokens (`src/styles/global.css`)
 
 White background, black text, one accent `--color-accent: #0000ff` (arrows only). Font: ABC Areal
 Superfamily Variable, self-hosted `public/fonts/ABCArealSuperfamilyVariable.woff2` (axes:
-`wght` 400–700, `slnt` 0…−12). Declared twice from the same file: `font-style: normal` and
-`font-style: oblique 12deg` — italics use the font's real slanted design. Type sizes use
-`clamp(phone size, vw, desktop size)`; new this round: `--fs-subheading` (20–32 px) and
-`--fs-credits` (16–28 px), `--fade-intro: 500ms`. Layout breakpoint: 48rem (768 px). Links get a
-2 px `currentColor` outline on `:focus-visible` only. `scroll-behavior: smooth` unchanged.
+`wght` 400–700, `slnt` 0…−12), declared as `normal` and `oblique 12deg` from the same file. Type
+sizes use `clamp(phone size, vw, desktop size)`. Layout breakpoint: 48rem (768 px). Links get a
+2 px `currentColor` outline on `:focus-visible` only.
+
+Spacing tokens:
+
+| Token | Phone | Desktop (≥ 48rem) | Used for |
+| --- | --- | --- | --- |
+| `--gutter` | 5px | 20px | fixed header (pills), skip link, loading overlay padding |
+| `--content-gutter` (new) | 20px | `var(--gutter)` (20px) | horizontal padding of `.section` (artist block, lists + credits, 404) and `.landing` |
+| `--feature-col` (new) | — | 710px | width of the artist column |
+| `--col-gap` | 20px | 20px | header grid, lists columns |
+
+Desktop rendering is unchanged by `--content-gutter`.
 
 ### Content collections (Tina ⇄ Astro, same files)
 
@@ -88,26 +118,20 @@ Superfamily Variable, self-hosted `public/fonts/ABCArealSuperfamilyVariable.woff
 | --- | --- | --- | --- |
 | `site` | singleton | `content/site/settings.json` | siteTitle, tagline, socialLinks[] {label, url} (*unused*), footerText ("Credits line") |
 | `exhibition` | singleton | `content/exhibition/current.md` | title, datesLine, startDate, endDate, venue, presentingPrefix, currentLabel, logo (overlay + `og:image`) |
-| `artists` | list | `content/artists/*.md` (filename = slug) | name, status (current / upcoming / previous), period (free text), order, imageSide (left / right), mainImage, body (rich-text, "Text" — the whole text), btsImage ("Second image"), links[] {label, url} |
+| `artists` | list | `content/artists/*.md` (filename = slug) | name, status (current / upcoming / previous), period (free text), order, imageSide (left / right — *unused by the layout*), mainImage, body (rich-text, "Text"), btsImage ("Second image"), **btsCaption ("Second image caption", new)**, links[] {label, url} |
 
 Schema changes this round:
-- **`continuedText` removed** from `tina/config.ts` and `src/content.config.ts`. The artist's
-  whole text is the Markdown body. Tina toolbar for "Text" is reduced to heading, bold, italic,
-  link, with one heading level (`overrides: { toolbar: [...], headingLevels: ['h3'] }`, shape
-  checked against the installed `@tinacms/schema-tools` types). Description: "Sub-headings
-  (e.g. 'About the works:') are headings in the editor."
-- `btsImage` relabelled "Second image" with a new description; `footerText` relabelled "Credits
-  line"; the logo description now describes the overlay.
-- `marked` / `renderMarkdown()` are gone (nothing else used them), so the transitive-`marked` risk
-  is gone too.
-- **Migration:** only `sabrina-gschwandtner.md` had `continuedText`; it was appended to the body
-  as paragraphs and the key deleted. No other prose was edited. Because Sabrina's body already
-  contained the text twice, **the text now appears three times** — Caspar must clean it up (below).
-- `content/site/settings.json` `footerText` seeded with "The festival is curated by The Space
-  Craft and organized in collaboration with Centrum for AMP. Supported by Region Stockholm."
-- `tina/tina-lock.json` regenerated with `tinacms build --local` (stopped at the Tina Cloud check
-  as before — no network to Tina Cloud from the sandbox; the lock file is complete: no
-  `continuedText`, has `headingLevels` and the new labels; schema version still 4.0.1).
+- **`btsCaption`** added after `btsImage` in `tina/config.ts`: `rich-text`, not `isBody` (Tina
+  stores a Markdown string in the frontmatter), toolbar bold / italic / link. zod:
+  `z.string().optional()`. Not added to any content file.
+- Descriptions: `btsImage` → "Shown below the whole text, at full column width."; `imageSide` →
+  "Not used by the current layout (images are centred)."
+- `links` / `socialLinks` (zod only): items with an empty `label` or `url` are dropped instead of
+  failing the build (see Status 2).
+- `tina/tina-lock.json` regenerated with `npx tinacms build --local` (stopped at the Tina Cloud
+  check as before, no network to Tina Cloud from the sandbox). The lock contains `btsCaption`
+  with the toolbar override; schema version still 4.0.1.
+- New dependency: `marked` `^18.1.2` (see DECISIONS).
 
 How the fields are used:
 - Landing title = `title`; landing dates line = `datesLine` + ". " + `venue` + "."; header shows
@@ -117,25 +141,29 @@ How the fields are used:
   `#current` are left out.
 - Lists are filtered by `status` and sorted by `order`; `period` is shown as written.
 
-Current content: exhibition "Out of This World! …", 30 October – 11 December 2026, Jan Stenbecks
-torg, Kista; logo `/uploads/LOGO.png`. Artists: Sabrina Gschwandtner (current, images
-`/uploads/Roni-1.png` + `/uploads/Instagram-post-7.png`), Boom! Glass Group, Roni Kaufman, Helene
-Kask, Maria Pita Guerreiro, Joanne Grüne Yanoff (upcoming, "Text coming soon.", no images).
-`public/uploads/` also holds `LOGO-2.png` (unused).
+Current content: exhibition "Out of This World! Exhibition Festival of Contemporary Craft and
+Innovation.", 30 October – 11 December 2026, Jan Stenbecks torg, Kista; logo `/uploads/LOGO.png`.
+Artists: Sabrina Gschwandtner (current, main image `/uploads/2160Sabrina.png`, second image
+`/uploads/Photo-Joshua_White-jwpictures.com-9991.jpg`, text cleaned up with `###` sub-headings; its
+last paragraph is the photo credit, see "What Caspar must do"; one empty Links item), Boom! Glass
+Group, Roni Kaufman, Helene Kask, Maria Pita Guerreiro, Joanne Grüne Yanoff (upcoming, no images).
 
-### Verified (headless Chromium, 1512×982 and 390×844, test content not committed)
+### Verified (headless Chromium 153, 1512×982 and 390×844, test content not committed)
 
-- Left image, long text with a sub-heading: last right-column line sits beside the main image,
-  the next line starts at the main image's bottom edge beside the second image — no full-width
-  line in between; text continues full width below both images.
-- `imageSide: right` mirrors exactly. No second image: text goes full width below the main image.
-  Text shorter than the main image: nothing beside the second image.
-- Phone stacking order and gaps as specified; second image lazy-loads.
-- Overlay: opaque ~0.85 s, fades by ~1.35 s, removed; gone instantly with reduced motion; hidden
-  without JS. Header title: `#top` on home, `/` on subpages. Arrow jump to `#current` shows the
-  header. No console errors on any route (404 only logs its own 404 status).
-- Note: where a text line would straddle the main image's bottom edge, the browser moves it below
-  that edge, leaving a gap of up to one line height on the text side — inherent to floats, fine.
+- `:has()` and `~` inside `:not()` work (`CSS.supports('selector(:has(a))')` = true).
+- Text with sub-headings (Sabrina): title → intro paragraph → main image → "About the works:" →
+  … → second image → caption → links → "← Home". Main image exactly 26 px below the intro and
+  26 px above the sub-heading.
+- Text without a sub-heading: main image after the first paragraph.
+- Caption filled but no second image: no caption.
+- Desktop: every item at x = 401–1111 (710 px, centred in 1512); main image 710 × 710.
+- Phone: every content item starts 20 px from the edge (landing, artist block, lists, credits);
+  header title and bottom dates line text at 5 px. Second image lazy-loads on scroll.
+- Desktop unaffected by the gutter change: compared against a local build of `36ae034` (what run
+  #34 deployed; https://thespacecraft.se itself was not reachable from the sandbox): `#landing`
+  pixel-identical; the lists/header view differs by one antialiased arrow pixel only, because the
+  lists now start at a different sub-pixel y offset under the taller artist block.
+- `/artists/[slug]` renders the block exactly like `#current`. No console errors on any route.
 
 ### Workflows
 
@@ -148,61 +176,73 @@ Kask, Maria Pita Guerreiro, Joanne Grüne Yanoff (upcoming, "Text coming soon.",
 
 ## What Caspar must do (browser only)
 
-1. **Merge this round's PR** on GitHub (Pull requests → the "design fixes" PR from
-   `claude/eager-ride-of8ykd` → Merge). Then Actions → the new "Deploy to GitHub Pages" run →
+1. **Merge this round's PR** on GitHub (Pull requests → "design fixes round 2" from
+   `claude/festive-planck-vjztn2` → Merge). Then Actions → the new "Deploy to GitHub Pages" run →
    check it is green, **especially the "Build Tina admin" step** (Tina Cloud must re-index the
-   changed schema; if it fails, wait a minute and use "Run workflow").
-2. Open https://thespacecraft.se/admin → Artists → any artist: the "Text" field's toolbar should
-   show only heading, bold, italic and link; "Text, continued" should be gone. If the old field
-   still shows, Tina Cloud hasn't re-indexed yet — reload later.
-3. In `/admin`:
-   - **Sabrina Gschwandtner → Text:** the text is there three times (it was pasted twice before,
-     and "Text, continued" has been moved into it). Delete the duplicates so it appears once.
-   - **Add sub-headings** (e.g. "About the works:") with the heading button in the toolbar.
-   - **Site settings → Credits line:** check the sentence.
-   - **Artists → Period:** use the "6 – 13 Nov" form consistently (Roni Kaufman onwards still
-     say "November 13th" etc.). Replace "Text coming soon." and upload images when available.
-   - When an exhibition ends: set that artist's **Status** to *Previous* and the next one to
-     *Current* (only one *Current* at a time; the lowest **Sort order** wins).
+   changed schema; if it fails, wait a minute and use "Run workflow"). This run also fixes the red
+   run #35.
+2. Open https://thespacecraft.se/admin → Artists → any artist: below "Second image" there should
+   be **"Second image caption"** with only bold, italic and link in its toolbar. If it's missing,
+   Tina Cloud hasn't re-indexed yet; reload later.
+3. In `/admin` → **Sabrina Gschwandtner**:
+   - **Second image caption:** type the credit, e.g. "Image features *“Hands at Work Video”*,
+     2017. Photo by Joshua White Photography." Select the work title and press the italic button
+     if it should be italic. Save.
+   - **Text:** delete that same last line ("Image features … Photo by Joshua White
+     Photography.") from the text, so it isn't shown twice.
+   - **Links:** there is one empty item; delete it (trash icon) or fill in label + URL. It no
+     longer breaks the build, but it isn't shown either.
+4. Check https://thespacecraft.se on a phone and a laptop: one centred column, main image between
+   the first paragraph and "About the works:", second image + caption at the end.
+5. Ongoing: Artists → Period: use the "6 – 13 Nov" form consistently; replace "Text coming soon."
+   and upload images when available. When an exhibition ends: set that artist's **Status** to
+   *Previous* and the next one to *Current* (only one *Current* at a time; the lowest **Sort
+   order** wins). Put a sub-heading after the first paragraph(s) of each text: that's where the
+   main image goes.
 
 ## In progress
 
-- Nothing. The design-fix PR is waiting to be merged.
+- Nothing. The round-2 PR is waiting to be merged.
 
 ## Next steps
 
-1. Merge the PR, check the deploy and `/admin` (above). Clean up Sabrina's text.
+1. Merge the PR, check the deploy and `/admin` (above), fill in the caption.
 2. Unpin `@tinacms/cli` / remove the `@tinacms/graphql` override, regenerate
    `tina/tina-lock.json`, verify CI's Tina step (own session, on a green `main`).
 3. Later: first light visual as a client-only island in `src/components/visual/` (separate prompt).
 
 ## Open questions for Caspar
 
-- **Main image cropping:** non-square uploads are cropped to a square (second image to 720 × 822).
-  OK, or should whole artworks be shown uncropped?
+- **Image cropping:** the main image is cropped to a square, the second image to 720 × 822. OK,
+  or should whole artworks be shown uncropped?
 - **Social links:** `socialLinks` still exists in Site settings but isn't shown. Keep or drop?
-- **`/artists` page:** nothing links to it any more (artist pages now go "← Home"). Keep it as a
-  hidden overview, or remove it?
+- **`/artists` page:** nothing links to it. Keep it as a hidden overview, or remove it?
+- **Drop `imageSide`?** "Main image side" no longer does anything (images are centred). Remove the
+  field from both schemas and the content files?
+- **Loading overlay on phone:** the logo keeps 5 px side padding (it's a splash, not content).
+  Should it be 20 px like the content?
 
 ## Known issues
 
-- **Tina Cloud hasn't seen the new schema yet** (lock file regenerated offline — see above). Check
-  the first deploy's "Build Tina admin" step.
-- **`scroll-margin-top` deliberately not added** to `#current` / `#exhibitions`: those sections
-  already start with `--header-space` padding, so anchor jumps never hide content; an extra scroll
-  margin would double the gap and leave `#landing`'s bottom edge in view after the arrow jump,
-  which keeps the home header hidden (see DECISIONS).
-- **Figma not re-read this round:** the Figma MCP's plan limit was reached at the start of the
-  session; the layout follows the measurements given in the task (frames 35:16, 42:145, 38:47,
-  phone frames).
+- **`main` is red until this PR is merged** (run #35, see Status 2).
+- **Tina Cloud hasn't seen the new schema yet** (lock file regenerated offline). Check the first
+  deploy's "Build Tina admin" step.
+- **`/admin` commits since 2026-11-01 are authored by `tinacloud-app[bot]`**, not a person. With
+  "act as self", Tina falls back to the bot when the editor's GitHub account can't write to the
+  repo; most likely the second editor has no access to `BromsC/spacecraft-site`. Saving works.
+  If attribution matters: GitHub → repo Settings → Collaborators → add their account (Write).
+- **`:has()` required** for the image position (all current browsers). Older browsers show the
+  text in order with the main image above it.
+- **Figma not read this round** (as instructed); the layout follows Caspar's screenshots as
+  described in the task.
+- **`scroll-margin-top` deliberately not added** to `#current` / `#exhibitions` (see DECISIONS).
 - **Font path:** `@font-face` uses `/fonts/…` (root-relative) — fine on the custom domain.
 - **Tina packages are pinned:** `@tinacms/cli` `4.0.3` + `overrides` `@tinacms/graphql` `4.0.1`
   (see DECISIONS). Don't let Dependabot/`npm update` bump these until next step 2.
 - **`www` certificate:** if https://www.thespacecraft.se shows a certificate error: GitHub → repo
   Settings → Pages → Custom domain → **Remove**, re-enter `thespacecraft.se` → Save, wait for the
   DNS check, tick "Enforce HTTPS" again.
-- `npm install` warns that `react-final-form` (inside `tinacms`) wants React ≤18, and about the
-  Node engine in some sandboxes; harmless.
+- `npm install` warns that `react-final-form` (inside `tinacms`) wants React ≤18; harmless.
 - `npm audit` reports advisories in transitive dependencies of the Tina CLI (build-time only).
 
 ## Environment / secrets status
@@ -215,8 +255,8 @@ Kask, Maria Pita Guerreiro, Joanne Grüne Yanoff (upcoming, "Text coming soon.",
 | GoDaddy DNS → GitHub Pages | ✅ pointed (records below) |
 | Tina Cloud project | ✅ "spacecraft-site" in Caspar's org; GitHub app installed on `BromsC/spacecraft-site` only; branch `main` indexed |
 | Tina Cloud site URLs | ✅ `https://bromsc.github.io`, `https://thespacecraft.se` |
-| Tina Cloud git authoring | ✅ "act as self" — commits from `/admin` are authored by BromsC |
-| Tina Cloud plan | ✅ Free (2 users) |
+| Tina Cloud git authoring | ✅ "act as self" (falls back to `tinacloud-app[bot]` when the editor can't write to the repo) |
+| Tina Cloud plan | ✅ Free — 2/2 users (second editor added 2026-11-01, role Editor) |
 | Repo secret `TINA_CLIENT_ID` | ✅ set |
 | Repo secret `TINA_TOKEN` | ✅ set (the auto-generated Content read-only token, branches `*`) |
 
@@ -242,7 +282,7 @@ Deleted during setup: GoDaddy's default "Parked" A record on `@` and the old `ww
 
 - Production: https://thespacecraft.se (admin: https://thespacecraft.se/admin/)
 - Old preview URL https://bromsc.github.io/spacecraft-site/ → redirects to the domain.
-- Last deploy: run #19 (push, "TinaCMS content update") on `499a5ba`, green
-  (2026-10-28 11:35 UTC). Run #11 (PR #1 merge, `162bd3e`) and the Tina content runs #12–#18
-  are green, except #13 and #15, which were cancelled by the next push (expected).
+- Live deploy: run #34 (push, "TinaCMS content update") on `36ae034`, green (2026-11-01 20:40
+  UTC). Latest run #35 on `9f55bf5` **failed** (empty link item, fixed by this round's PR).
+  PR #2 merge: `4c869a2` (2026-10-30).
 - Deploy runs: https://github.com/BromsC/spacecraft-site/actions
