@@ -426,7 +426,7 @@ Format: date · decision · why · alternatives rejected.
 - **Why:** (1) The caption is secondary to the text; in Caspar's frames it is smaller. (2) The
   browser's default for `<em>`/`<i>` is `font-style: italic`. ABC Areal has no italic face, only
   the oblique face (`slnt` axis), so Chromium matched that face and *also* added its own fake
-  slant: editor italics came out more slanted than the font's design. Headed-browser check:
+  slant: editor italics came out more slanted than the font's design. Headless Chromium check:
   `<em>` (italic) vs. an explicit `oblique 12deg` sample differ visibly; with the new rule they
   are the same. `font-synthesis: none` makes sure the browser never fakes bold or italic for this
   font. Nothing relied on synthesis: every slanted style already sets `oblique 12deg`, and all
