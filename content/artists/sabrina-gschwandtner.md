@@ -7,7 +7,7 @@ imageSide: left
 mainImage: /uploads/2160Sabrina.png
 btsImage: /uploads/Photo-Joshua_White-jwpictures.com-9991.jpg
 btsCaption: |
-  Sabrina Gschwandtner, "Hands at Work Video," 2017.  Photo by Joshua White Photography. 
+  Sabrina Gschwandtner, "Hands at Work Video," 2017.  Photo by Joshua White Photography.
 links:
   - {}
 ---
@@ -21,8 +21,6 @@ Sabrina Gschwandtner (USA) is a visual artist and filmmaker. Two works by the ar
 
 \
 Sabrina Gschwandtner uses Alice Guy-Blaché’s 1897 film of Mrs. Bob Walter performing Loie Fuller’s Serpentine Dance to address the double erasure of Guy-Blaché, an under-recognized filmmaker, and Fuller, whose dance could not be copyrighted and was widely imitated. Gschwandtner’s video quilt uses diagonal seams to amplify the organic forms of the dancer’s billowing fabric, while digitally coloring her dress frame by frame in reference to early hand-colored films.
-
-
 
 “Hands at Work Video”, 2017. \
 HD video, color, silent, 2:42 mins (loops).  
