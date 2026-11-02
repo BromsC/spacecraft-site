@@ -42,7 +42,8 @@
   --fs-header: 12px;
 
   /* Spacing */
-  --gutter: 5px;
+  --gutter: 5px; /* fixed header (pills) */
+  --content-gutter: 20px; /* horizontal padding of all page content */
   --col-gap: 20px;
   --header-top: 9px;
   --header-space: 67px; /* top of content below the fixed header */
@@ -52,12 +53,16 @@
   --section-end: 48px;
   --fade: 300ms;
   --fade-intro: 500ms;
+
+  /* Artist block: width of the centred column on desktop */
+  --feature-col: 710px;
 }
 
 @media (min-width: 48rem) {
   :root {
     --fs-header: clamp(14px, 1.323vw, 20px);
     --gutter: 20px;
+    --content-gutter: var(--gutter);
     --header-top: 16px;
     --header-space: 79px;
     --section-end: 64px;
@@ -129,8 +134,8 @@ p {
   margin: 0;
 }
 
-/* Sub-headings in the text ("About the works:"). Every level looks the same; no `clear`, so they
-   wrap around the artist images like paragraphs. */
+/* Sub-headings in the text ("About the works:"). Every level looks the same. In the artist block
+   the first sub-heading also marks where the main image goes (see .feature__body). */
 .prose :is(h1, h2, h3, h4, h5, h6) {
   margin: 1em 0 0.3em;
   font-size: var(--fs-subheading);
@@ -266,7 +271,7 @@ p {
 /* Sections ----------------------------------------------------------------------------------- */
 
 .section {
-  padding: var(--header-space) var(--gutter) var(--section-end);
+  padding: var(--header-space) var(--content-gutter) var(--section-end);
 }
 
 /* Loading overlay (home page): logo over everything for a moment, then fades out (index.astro).
@@ -320,7 +325,7 @@ p {
   align-items: center;
   min-height: 100vh;
   min-height: 100svh;
-  padding: var(--header-space) var(--gutter) clamp(16px, 1.5vw, 23px);
+  padding: var(--header-space) var(--content-gutter) clamp(16px, 1.5vw, 23px);
   text-align: center;
 }
 
@@ -362,9 +367,16 @@ p {
   width: calc(var(--arrow-down) * 60 / 110);
 }
 
-/* #current / artist page: main image, second image, name/period, the whole text */
+/* #current / artist page: one centred column on every viewport.
+   DOM: main image, second image, caption, title, .feature__body (the rendered Markdown), extra
+   (links / back link). `.feature__body` is `display: contents`, so its paragraphs and headings are
+   grid items and can be ordered individually:
+     1 title · 2 intro (text before the first sub-heading) · 3 main image ·
+     4 rest of the text (first sub-heading onwards) · 5 second image · 6 caption · 7 extra
+   Without any sub-heading the intro is the first paragraph. Needs `:has()` (all current
+   browsers); without it everything after the title still shows, only the main image moves to
+   the top of the text. */
 
-/* Phone: one column, stacked with `order`. */
 .feature {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -373,77 +385,83 @@ p {
 
 .feature__title {
   order: 1;
+  margin-bottom: 17px; /* title → intro */
   font-size: var(--fs-heading);
   font-weight: 700;
   text-align: center;
 }
 
-.feature__image {
+.feature__body {
+  display: contents;
+}
+
+.feature__body > * {
+  order: 4;
+}
+
+/* Intro: everything that is not a heading and not after a heading. */
+.feature__body:has(:is(h1, h2, h3, h4, h5, h6)) > :not(:is(h1, h2, h3, h4, h5, h6), :is(h1, h2, h3, h4, h5, h6) ~ *) {
   order: 2;
+}
+
+/* No sub-heading at all: the main image goes after the first paragraph. */
+.feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > :first-child {
+  order: 2;
+}
+
+/* The first sub-heading follows the main image directly: the image's margin is the gap. */
+.feature__body > :is(h1, h2, h3, h4, h5, h6):not(:is(h1, h2, h3, h4, h5, h6) ~ *) {
+  margin-top: 0;
+}
+
+.feature__image {
+  order: 3;
   justify-self: center;
   width: 133px;
-  margin-top: 17px;
+  margin-block: 26px;
   aspect-ratio: 1;
   object-fit: cover;
 }
 
-.feature__body {
-  order: 3;
-  margin-top: 26px;
-}
-
 .feature__second {
-  order: 4;
+  order: 5;
   width: 100%;
   margin-top: 26px;
   aspect-ratio: 720 / 822;
   object-fit: cover;
 }
 
-/* Desktop: both images float (main on imageSide, second on the other side, its top edge exactly at
-   the main image's bottom edge), the title and text flow around them. flow-root contains the
-   floats; `order` is ignored here. */
+.feature__caption {
+  order: 6;
+  margin-top: 8px;
+  font-size: var(--fs-body);
+  text-align: left;
+}
+
+.feature__caption p {
+  margin: 0;
+}
+
+.feature__extra {
+  order: 7;
+}
+
+/* Desktop: the same column, at most --feature-col wide and centred; title, text, both images and
+   the caption share its left and right edges. */
 @media (min-width: 48rem) {
-  .feature {
-    display: flow-root;
-  }
-
-  .feature__image,
-  .feature__second {
-    width: calc(50% - var(--col-gap) / 2);
-    margin: 0;
-  }
-
-  .feature__image {
-    float: left;
-    margin-right: var(--col-gap);
-  }
-
-  .feature__second {
-    float: right;
-    clear: left;
-    margin-left: var(--col-gap);
-  }
-
-  .feature--image-right .feature__image {
-    float: right;
-    margin-right: 0;
-    margin-left: var(--col-gap);
-  }
-
-  .feature--image-right .feature__second {
-    float: left;
-    clear: right;
-    margin-left: 0;
-    margin-right: var(--col-gap);
+  .feature > *,
+  .feature__body > * {
+    justify-self: center;
+    width: min(100%, var(--feature-col));
   }
 
   .feature__title {
+    margin-bottom: clamp(32px, 6.3vw, 95px); /* title → intro */
     text-align: left;
   }
 
-  .feature__body {
-    margin-top: clamp(32px, 6.3vw, 95px);
+  .feature__image {
+    width: min(100%, var(--feature-col));
   }
 }
 

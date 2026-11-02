@@ -148,6 +148,7 @@ export default defineConfig({
             type: 'string',
             name: 'imageSide',
             label: 'Main image side',
+            description: 'Not used by the current layout (images are centred).',
             options: [
               { value: 'left', label: 'Left' },
               { value: 'right', label: 'Right' },
@@ -171,8 +172,16 @@ export default defineConfig({
             type: 'image',
             name: 'btsImage',
             label: 'Second image',
+            description: 'Shown below the whole text, at full column width.',
+          },
+          {
+            type: 'rich-text',
+            name: 'btsCaption',
+            label: 'Second image caption',
             description:
-              'Shown on the opposite side of the main image, directly below it. Text flows around both.',
+              'Shown under the second image, e.g. "Image features …, 2017. Photo by …". Use the italic button for italics.',
+            // Not isBody: Tina stores it as a Markdown string in the frontmatter.
+            overrides: { toolbar: ['bold', 'italic', 'link'] },
           },
           {
             type: 'object',

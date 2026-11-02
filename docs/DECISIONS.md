@@ -338,3 +338,82 @@ Format: date · decision · why · alternatives rejected.
   dependency-free.
 - **Rejected:** Lenis (new dependency, overrides native scrolling and its accessibility; revisit
   only if a later visual design needs scroll-linked motion).
+
+## 2026-11-02 — Single centred column for the artist block (supersedes "One text field per artist, floats for the 'clean cut'")
+
+- **Decision:** Keep the one text field (Markdown body). Drop the float layout: `ArtistFeature`
+  is a one-column CSS grid on every viewport. `.feature__body` is `display: contents`, so the
+  rendered paragraphs and headings are grid items, and CSS `order` sets the visual order: title
+  → intro (everything before the first sub-heading, picked out with
+  `:has()` + `:not(:is(h1…h6), :is(h1…h6) ~ *)`) → main image → rest of the text → second image →
+  caption → links / back link (slot, now outside the text in `.feature__extra`). With no
+  sub-heading, the main image goes after the first paragraph. Desktop: column
+  `--feature-col: 710px`, centred, every element on the same edges; main image square at full
+  column width. Phone: same order; main image 133 px. `imageSide` stays in both schemas and the
+  content but no longer affects the layout.
+- **Why:** Caspar's new Figma screenshots (frames 35:16 → 42:145 revised) show one centred
+  column. The image position follows the editor's own structure (the first sub-heading), so
+  there is still no JS, no measuring and no text splitting.
+- **Dependency:** `:has()` (Chromium 105+, Safari 15.4+, Firefox 121+; checked in headless
+  Chromium 153). Without it, the text still shows in DOM order, only the main image moves to the
+  start of the text.
+- **Rejected:** JS that splits the text at the first heading (flash, more code); a second text
+  field again (editors would have to split the text); keeping floats (not the design any more).
+
+## 2026-11-02 — `--content-gutter`: 20 px content padding on phone, header exempt
+
+- **Decision:** New token `--content-gutter` (20 px on phone, `var(--gutter)` on desktop, where
+  `--gutter` is already 20 px). It is used for the horizontal padding of `.section` (artist
+  block, lists + credits line, 404) and `.landing`. The fixed header keeps `--gutter` (5 px on
+  phone). The loading overlay also keeps `--gutter` (5 px on phone): it is a full-screen splash,
+  not page content.
+- **Why:** Caspar's Figma phone frames: all content starts 20 px from the edge, the header text
+  ~5 px. Desktop renders the same as before (checked: landing pixel-identical; the lists differ
+  only by one antialiased arrow pixel because they start at a different sub-pixel offset below
+  the taller artist block).
+- **Rejected:** Changing `--gutter` on phone (would move the header too).
+
+## 2026-11-02 — Second-image caption field, rendered with `marked` (supersedes the "no `marked`" part of the 2026-10-30 entry)
+
+- **Decision:** New artist field `btsCaption` ("Second image caption"): Tina `rich-text`, not
+  `isBody`, toolbar bold / italic / link (`overrides.toolbar`, checked against the installed
+  `@tinacms/schema-tools` types). Tina stores it as a Markdown string in the frontmatter; zod
+  `z.string().optional()`. `renderCaption()` in `src/lib/content.ts` renders it with
+  `marked.parseInline()` (one module-level `Marked` instance) per blank-line-separated block,
+  each wrapped in `<p>`, so only inline formatting comes out (headings or lists typed by hand stay
+  plain text). Shown only if `btsImage` is set and the caption is non-empty after trimming.
+- **Dependency added:** `marked` `^18.1.2` (latest stable on npm on 2026-11-02) in
+  `dependencies`. Build-time only; the site still ships no JS for this and no React.
+- **Why `marked`:** The rule was: use `@astrojs/markdown-remark` with Astro's own version spec if
+  Astro lists it in `dependencies`. Astro 7.4 does not: it is only an *optional peer dependency*
+  (Astro's own Markdown now goes through `@astrojs/markdown-satteri`), so adding it would pull a
+  second, unused Markdown pipeline. `marked` is small, has an inline-only API and was used here
+  before.
+- **Rejected:** `@astrojs/markdown-remark` (see above); `@astrojs/markdown-satteri` (Astro-internal
+  package, no stable public API); a plain-text field plus an "italic" checkbox (can't italicise
+  only a title inside the sentence, as the existing caption needs); a hand-written inline
+  renderer (escaping and link edge cases for no gain).
+
+## 2026-11-02 — Incomplete link items are dropped, not build errors
+
+- **Decision:** The shared `links` zod schema (artist `links`, site `socialLinks`) accepts items
+  with missing `label`/`url` and drops them (trimmed, both required to keep an item). Tina's
+  fields stay `required`.
+- **Why:** On 2026-11-01 an `/admin` save wrote an empty item (`links: - {}`) into
+  `sabrina-gschwandtner.md`; `astro build` rejected it and deploy run #35 failed, so the site
+  stayed on run #34. An editor clicking "add link" and leaving it empty must not break the site.
+- **Rejected:** Deleting the empty item from the content file by hand (it would come back the
+  next time it happens); making the Tina fields optional (editors would get no hint).
+
+## 2026-11-01 — Second editor on the Tina Cloud project
+
+- **Decision:** A second editor was added to the Tina Cloud project (Tina Cloud org → Users →
+  invite; project → Collaborators, role **Editor**). Git authoring stays "act as self". The new
+  editor connected their own GitHub account at signup. The free plan is now at its limit of 2
+  users.
+- **Why:** Content is edited by more than one person.
+- **Note:** The 2026-11-01 `/admin` commits are authored by `tinacloud-app[bot]`, not a person —
+  that is "act as self" falling back to the bot, most likely because the new editor's GitHub
+  account has no write access to `BromsC/spacecraft-site`. Saving works either way.
+- **Rejected:** Sharing one login (no attribution of edits); a paid plan (not needed
+  for two editors).

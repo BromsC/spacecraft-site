@@ -1,13 +1,16 @@
 ---
 import { render } from 'astro:content';
 import type { Artist } from '../lib/content';
+import { renderCaption } from '../lib/content';
 import { url } from '../lib/url';
 
-// Main image + second image + name/period + the whole text (Figma "MacBook Pro 14 - 3" → "- 6").
-// Desktop: both images are floats in a flow-root box — the main image on `imageSide`, the second
-// image on the other side directly below it — so the text runs beside the main image, breaks at
-// its bottom edge and continues beside the second image ("clean cut", no JS). Phone: a grid
-// stacked with `order` (name, small square image, text, links, second image).
+// Artist block, one centred column on every viewport (Figma "MacBook Pro 14 - 3" → "- 6" and the
+// phone frames, as revised by Caspar's screenshots). Visual order, set with CSS `order` only:
+//   title → intro (text before the first sub-heading) → main image → rest of the text →
+//   second image → caption → links / back link (slot).
+// `.feature__body` is `display: contents`, so the rendered paragraphs/headings are grid items and
+// the intro is picked out with `:has()` — no JS, no text splitting. Without a sub-heading the main
+// image goes after the first paragraph. See global.css "#current / artist page".
 interface Props {
   artist: Artist;
   id?: string;
@@ -17,11 +20,14 @@ interface Props {
 
 const { artist, id, headingLevel = 2 } = Astro.props;
 const Heading = headingLevel === 1 ? 'h1' : 'h2';
-const { name, period, mainImage, btsImage, imageSide } = artist.data;
+const { name, period, mainImage, btsImage, btsCaption } = artist.data;
 const { Content } = await render(artist);
+// Caption only belongs to the second image.
+const caption = btsImage ? renderCaption(btsCaption) : undefined;
+const hasExtra = Astro.slots.has('default');
 ---
 
-<section id={id} class:list={['section', 'feature', `feature--image-${imageSide}`]}>
+<section id={id} class="section feature">
   {
     mainImage && (
       <img class="feature__image" src={url(mainImage)} alt={name} width="726" height="726" decoding="async" />
@@ -40,12 +46,19 @@ const { Content } = await render(artist);
       />
     )
   }
+  {caption && <div class="feature__caption prose" set:html={caption} />}
   <Heading class="feature__title">
     {name}
     {period && (<><br />{period}</>)}
   </Heading>
   <div class="feature__body prose">
     <Content />
-    <slot />
   </div>
+  {
+    hasExtra && (
+      <div class="feature__extra">
+        <slot />
+      </div>
+    )
+  }
 </section>

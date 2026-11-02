@@ -6,17 +6,23 @@ import { z } from 'astro/zod';
 // Keep both schemas in sync. Image fields are public paths like "/uploads/x.svg".
 // Entry ids come from filenames (content/artists/jane-doe.md → id "jane-doe").
 
-const link = z.object({
-  label: z.string(),
-  url: z.string(),
-});
+// A list of links. Tina writes an empty item (`- {}`) when "add item" is clicked and the item is
+// left blank; such incomplete items are dropped here instead of failing the build.
+const links = z
+  .array(z.object({ label: z.string().optional(), url: z.string().optional() }))
+  .default([])
+  .transform((items) =>
+    items.flatMap(({ label, url }) =>
+      label?.trim() && url?.trim() ? [{ label: label.trim(), url: url.trim() }] : [],
+    ),
+  );
 
 const site = defineCollection({
   loader: glob({ pattern: 'settings.json', base: './content/site' }),
   schema: z.object({
     siteTitle: z.string(),
     tagline: z.string().optional(),
-    socialLinks: z.array(link).default([]),
+    socialLinks: links,
     footerText: z.string().optional(), // "Credits line" under the exhibition lists
   }),
 });
@@ -42,10 +48,11 @@ const artists = defineCollection({
     status: z.enum(['current', 'upcoming', 'previous']),
     period: z.string().optional(),
     order: z.number().default(100),
-    imageSide: z.enum(['left', 'right']).default('left'),
+    imageSide: z.enum(['left', 'right']).default('left'), // kept, no longer affects the layout
     mainImage: z.string().optional(),
     btsImage: z.string().optional(),
-    links: z.array(link).default([]),
+    btsCaption: z.string().optional(), // Markdown string (Tina rich-text, not isBody)
+    links,
   }),
 });
 
