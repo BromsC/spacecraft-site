@@ -417,3 +417,22 @@ Format: date · decision · why · alternatives rejected.
   account has no write access to `BromsC/spacecraft-site`. Saving works either way.
 - **Rejected:** Sharing one login (no attribution of edits); a paid plan (not needed
   for two editors).
+
+## 2026-11-02 — Caption size token; explicit oblique for `em`/`i`; `font-synthesis: none`
+
+- **Decision:** (1) New token `--fs-caption: clamp(14px, 1.19vw, 18px)` (one step below
+  `--fs-body` 16→24) for `.feature__caption`, replacing `--fs-body`. (2)
+  `.prose em, .prose i { font-style: oblique 12deg; }` and `html { font-synthesis: none; }`.
+- **Why:** (1) The caption is secondary to the text; in Caspar's frames it is smaller. (2) The
+  browser's default for `<em>`/`<i>` is `font-style: italic`. ABC Areal has no italic face, only
+  the oblique face (`slnt` axis), so Chromium matched that face and *also* added its own fake
+  slant: editor italics came out more slanted than the font's design. Headed-browser check:
+  `<em>` (italic) vs. an explicit `oblique 12deg` sample differ visibly; with the new rule they
+  are the same. `font-synthesis: none` makes sure the browser never fakes bold or italic for this
+  font. Nothing relied on synthesis: every slanted style already sets `oblique 12deg`, and all
+  weights used (400, 500, 700) lie inside the font's 400–700 range. Before/after screenshots are
+  identical except the caption and existing italics in artist texts.
+- **Rejected:** `font-style: italic` on the oblique `@font-face` (maps to an `ital` axis the font
+  doesn't have; see the 2026-10-27 font entry); `font-synthesis: none` alone (would leave `<em>`
+  with `italic`, which still matches the oblique face, but its slant angle would be implicit,
+  not stated); a caption size in `em` (the token keeps all type sizes in one place).
