@@ -1,9 +1,10 @@
 ---
 name: Boom! Glass Group
-status: upcoming
+status: current
 period: 6 – 13 November
 order: 2
 imageSide: left
+btsCaption: ''
 ---
 
 *LIFE ON VENUS – Celestial Body* är en utställning där den feministiska konstnärsgruppen BOOM! låter glaset möta science fiction.
