@@ -4,6 +4,7 @@ status: current
 period: 6 – 13 November
 order: 2
 imageSide: left
+mainImage: /uploads/BoomGlass.png
 btsCaption: ''
 ---
 
