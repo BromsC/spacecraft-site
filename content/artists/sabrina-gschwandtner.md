@@ -1,6 +1,6 @@
 ---
 name: Sabrina Gschwandtner
-status: current
+status: previous
 period: 30 October – 6 November
 order: 1
 imageSide: left
