@@ -5,7 +5,9 @@ period: November 13th
 order: 3
 imageSide: left
 mainImage: /uploads/Roni-1.png
-btsCaption: ''
+btsImage: /uploads/16-x-20.png
+btsCaption: |
+  Roni Kaufman, “16 x 20”, 2026.
 ---
 
 ### Algorithms, Back and Forth
