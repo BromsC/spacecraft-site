@@ -10,7 +10,7 @@ btsCaption: ''
 
 ### LIFE ON VENUS – Celestial Body
 
-*LIFE ON VENUS – Celestial Body* is an exhibition in which the feminist art collective BOOM! brings glass into dialogue with science fiction.
+***LIFE ON VENUS – Celestial Body*** is an exhibition in which the feminist art collective BOOM! brings glass into dialogue with science fiction.
 
 \
 Taking the female body and the celestial body Venus—the planet traditionally associated with femininity—as its starting points, BOOM! places several works exploring the relationship between technology and the body within a cosmic context. At the heart of this universe is female solidarity: a sororocentric worldview in which everything revolves around sisterhood.
