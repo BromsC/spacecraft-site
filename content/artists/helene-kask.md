@@ -9,7 +9,7 @@ btsCaption: ''
 
 ### Talismanic Bodies
 
-***Talismanic Bodies*** explores futuristic scenarios and the protective qualities our bodies might need for
+*Talismanic Bodies* explores futuristic scenarios and the protective qualities our bodies might need for
 
 survival. Grounded in two theoretical and conceptual frameworks: Speculative Craft and The Hybrid
 
@@ -31,7 +31,9 @@ Working primarily with metals, Kask merges traditional jewelry techniques like e
 
 contemporary technologies such as 3D printing, a methodology she calls Cyborg Craft.
 
-***Talismaniska kroppar*** utforskar futuristiska scenarier och de skyddande egenskaper som våra kroppar
+### **Talismaniska kroppar**
+
+**Talismaniska kroppar** utforskar futuristiska scenarier och de skyddande egenskaper som våra kroppar
 
 kan tänkas behöva för överlevnad. Verket vilar på två teoretiska och konceptuella ramverk; Speculative
 
