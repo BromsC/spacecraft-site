@@ -33,7 +33,7 @@ contemporary technologies such as 3D printing, a methodology she calls Cyborg Cr
 
 ### **Talismaniska kroppar**
 
-**Talismaniska kroppar** utforskar futuristiska scenarier och de skyddande egenskaper som våra kroppar
+*Talismaniska kroppar* utforskar futuristiska scenarier och de skyddande egenskaper som våra kroppar
 
 kan tänkas behöva för överlevnad. Verket vilar på två teoretiska och konceptuella ramverk; Speculative
 
