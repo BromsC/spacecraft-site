@@ -4,6 +4,7 @@ status: upcoming
 period: November 13th
 order: 3
 imageSide: left
+mainImage: /uploads/Roni-1.png
 btsCaption: ''
 ---
 
