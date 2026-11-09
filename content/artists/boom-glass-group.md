@@ -8,6 +8,8 @@ mainImage: /uploads/BoomGlass.png
 btsCaption: ''
 ---
 
+### LIFE ON VENUS – Celestial Body
+
 *LIFE ON VENUS – Celestial Body* är en utställning där den feministiska konstnärsgruppen BOOM! låter glaset möta science fiction.
 
 \
