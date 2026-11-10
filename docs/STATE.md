@@ -2,58 +2,69 @@
 
 ## Last updated
 
-2026-11-10 — Two small fixes (Claude Code), no schema or content change:
-1. Empty lines left in the `/admin` editor show on the site as exactly one blank line
-   (`src/lib/blank-lines.ts`, a Sätteri Markdown step, plus a few CSS rules); paragraphs
-   otherwise stay margin-less. Commit `110b57b`, pushed to `main`.
-2. Sub-headings in artist texts are bold and **upright** (no forced oblique), as the editor shows
-   them; a heading is italic only where the editor sets italic. CSS only. Commit
-   `fix: upright sub-headings, italic only from the editor`.
+2026-11-10 — Editor rework (Claude Code): the `/admin` text editor and the site now follow one
+rule, so what a curator sees in the editor is what the site shows. Pull request
+[#5](https://github.com/BromsC/spacecraft-site/pull/5), branch `claude/editor-rework`, merged
+into `main` in this session. Details: DECISIONS 2026-11-10 (six entries).
+
+## The text rule (plain words)
+
+- **Enter** starts a new paragraph. A paragraph always has **exactly one blank line** above it
+  (one line of text tall: 26 px on desktop, 17 px on a phone).
+- **Shift+Enter** starts a new line directly underneath, **no gap** (for work credits, names).
+- There is no "empty line" trick any more. Pressing Enter twice does not make a bigger gap: Tina
+  does not save an empty paragraph. The editor now labels it "empty paragraph: not saved".
+  A Shift+Enter at the very end of a paragraph is not saved either.
+- Tools in **Text**: paragraph, line break, sub-heading, bold, italic (also inside a
+  sub-heading), link, bullet list. In **Second image caption**: italic and link.
+- The same rule holds in the caption.
+- **Pasting** (Google Docs, Word): the editor pastes plain text. Every line becomes a paragraph
+  with one blank line above it; bold, italic, links, headings and lists must be re-applied in the
+  editor.
 
 ## Status summary
 
-1. **Live:** https://thespacecraft.se. PR #3 (design-fix round 2: centred single-column artist
-   block, 20 px phone padding, "Second image caption" field, empty-link fix) merged 2026-11-02
-   (`84ab069`). PR #4 (caption size `--fs-caption` + real italics) merged 2026-11-10
-   (`c55c1b1`). Both are live (per Caspar).
-2. **Today's fixes** are on top of `c55c1b1`: empty lines `110b57b`, then the heading fix on top
-   of `110b57b`. `npm run build:site` and `npx astro check` pass with 0 errors, 0 warnings,
-   0 hints; both checked in headless Chromium at 1512×982 and 390×844 (see "Verified").
-   **Sub-headings that should be italic now need the italic button in `/admin`** (see "What
-   Caspar must do").
-3. **Content (from `/admin`, 2026-11-06 … 11-09):** Boom! Glass Group is now *current*
-   (6 – 13 November), Sabrina Gschwandtner *previous*. Roni Kaufman has images + caption.
-4. **Broken image on Sabrina's page:** her second image file
+1. **Live:** https://thespacecraft.se. PR #5 (editor rework) merged 2026-11-10; before it PR #4
+   (`c55c1b1`), the empty-lines fix `110b57b` and the upright-headings fix `1e79d23`.
+2. `npm run build:site`, `npx astro check` (0 errors, 0 warnings, 0 hints) and
+   `npm run test:text` (60 checks) pass.
+3. **The editor in `/admin` is restyled** (site font, 710 px column, same gaps). This was tested
+   in Tina's local mode in the sandbox, **not on the live Tina Cloud admin**: see "What Caspar
+   must do".
+4. **Content:** Boom! Glass Group *current* (6 – 13 November), Sabrina Gschwandtner *previous*.
+5. **Still broken:** Sabrina's second image file
    `/uploads/Photo-Joshua_White-jwpictures.com-9991.jpg` was deleted from the repo by a Tina
    media action (`edeab6d`, 2026-11-09) but her **Second image** field still points to it → 404
-   on `/artists/sabrina-gschwandtner` (the only console error on the site). See "What Caspar must
-   do".
+   on `/artists/sabrina-gschwandtner`.
+6. **The tag `pre-editor-rework` could not be pushed** from the sandbox (the git gateway drops
+   tag pushes). The same commit (`77102c8`, `main` before the rework) is kept as the **branch**
+   `pre-editor-rework` instead.
 
-## What the empty-lines fix found and does
+## What changed on each artist page
 
-What Astro 7's Markdown processor (Sätteri) makes of Tina's empty lines, checked in the built
-HTML of `origin/main`:
-
-| In the Markdown file | Built HTML before the fix | On screen before |
+| Page | File edited? | Change on the page |
 | --- | --- | --- |
-| `\` line directly followed by text (all of Boom's and Sabrina's `\` lines) | `<p><br>We seek…</p>` | one blank line — already worked |
-| `\` alone between blank lines | `<p>\</p>` | a literal backslash |
-| two `\` lines then text | `<p><br><br>Text</p>` | two blank lines |
-| `&#x20;` paragraph (Sabrina, between the two works) | `<p> </p>` | **nothing** (0 px) |
-| `text \` + next line (credits) | `text <br>next` | hard line break — correct |
+| Sabrina Gschwandtner | yes, structure only | None in layout: same text, same gaps, pixel-identical to before at 1512×982 and 390×844 (before the smoother line breaks, below). |
+| Boom! Glass Group (also `#current` on the home page) | yes, structure only | None in layout: pixel-identical as above. |
+| Roni Kaufman | no | One blank line now between "…the human hand." and "Visitors are invited…", and between "…in our societies." and "He is a graduate…". Page 52 px taller on desktop, 34 px on phone. |
+| Helene Kask | no | One blank line between the three paragraphs under "Talismanic Bodies" (2 gaps) and under "Talismaniska kroppar" (2 gaps). +104 px desktop, +68 px phone. |
+| Maria Pita Guerreiro | no | One blank line before "The project explores…", before "● Heliophile…" and before "She has participated…". +78 px desktop, +51 px phone. |
+| Joanne Grüne Yanoff | no | None (one paragraph). |
 
-So on `main`, Boom's "About BOOM!" / "Om BOOM!" gaps were already rendered (a leading `<br>`),
-but Sabrina's gap between "…hand-colored films." and "Hands at Work Video" was missing, and a
-lone `\` paragraph would have shown a backslash. (https://thespacecraft.se was not reachable from
-the sandbox, so the live HTML itself was not compared.)
+In the two edited files no character of the text changed: lines that had no gap between them are
+now joined with a line break, and each old "empty line" is now a paragraph boundary.
+**Smoother line breaks** (`text-wrap`, separate commit) then moved some line ends on all pages in
+browsers that support it (no single word alone on a last line; evenly broken headings).
 
-Now every empty line, whatever form Tina saved it in, becomes its own
-`<p class="blank-line"><br></p>`: exactly one line of body text tall (26 px desktop, 17 px phone,
-same as a one-line paragraph). Rule: each `\` on its own line (or each whitespace-only paragraph)
-= one blank line; two = two. A `\` at the end of a text line stays a line break. No backslash can
-reach the page. In the artist block, blank lines are not shown at the start/end of the text or
-directly above/below the main image (the layout already has a gap there). Details: DECISIONS
-2026-11-10.
+## Rollback
+
+1. GitHub → Pull requests → Closed → **#5** → **Revert** → Create pull request → Merge. The site
+   redeploys with the old rules.
+2. The exact pre-rework commit is the branch **`pre-editor-rework`** (`77102c8`; the tag of that
+   name could not be pushed, see Status 6).
+3. Caveat: texts saved in `/admin` **after** the merge are written for the new rule. Under the
+   old rules their paragraphs have no gaps until each is opened in `/admin`, given empty lines
+   again and saved.
 
 ## What exists
 
@@ -82,14 +93,13 @@ directly above/below the main image (the layout already has a gap there). Detail
   - DOM: main image, second image, caption, title (name + period), `.feature__body.prose` (the
     rendered Markdown), `.feature__extra` (slot: links + "← Home"; only if the slot has content).
   - `.feature` is a one-column grid; `.feature__body` is `display: contents`, so each paragraph,
-    blank line and heading is its own grid item. Visual order via CSS `order`:
+    list and heading is its own grid item. Visual order via CSS `order`:
     1 title · 2 intro (text before the first sub-heading) · 3 main image · 4 rest of the text ·
     5 second image · 6 caption · 7 links / back link. Intro selected with `:has()`; without a
-    sub-heading the main image goes after the first paragraph (blank lines before it don't
-    count).
-  - **Blank lines** (`.blank-line`, from `src/lib/blank-lines.ts`): one line tall, no CSS height.
-    Hidden at the start of the text, at the end, at the end of the intro (above the main image)
-    and, without a sub-heading, right below the main image.
+    sub-heading the main image goes after the first paragraph.
+  - **Paragraph gaps:** one line between neighbouring paragraphs/lists (`.prose` rule, margin on
+    top only). The element right after the main image has no top margin, so the image keeps
+    exactly 26 px above and below; no gap at the start or end of the text.
   - Desktop (≥ 48rem): column `min(100%, var(--feature-col))` (710 px), centred; title
     left-aligned. Gaps: title → intro `clamp(32px, 6.3vw, 95px)`; main image 26 px above and
     below (square, full column width); second image 26 px below the text (720 / 822); caption
@@ -100,20 +110,31 @@ directly above/below the main image (the layout already has a gap there). Detail
     **upright**; italic only where the editor set it (`<h3><em>…</em></h3>` → `oblique 12deg`).
     First sub-heading: top margin 0 (the image's 26 px is the gap); later ones `1em` top /
     `0.3em` bottom.
-  - Caption (`.feature__caption.prose`): `btsCaption` rendered to inline HTML (`marked`), only if
-    `btsImage` is set and the caption is non-empty. `--fs-caption` (14 → 18 px), left-aligned,
-    italics as `oblique 12deg`.
+  - Caption (`.feature__caption.prose`): `btsCaption` rendered by the same Markdown processor
+    as the text (paragraphs with inline formatting only), only if `btsImage` is set and the
+    caption is non-empty. `--fs-caption` (14 → 18 px), left-aligned, italics as `oblique 12deg`,
+    one caption line between paragraphs.
+  - Bullet lists: body size, `disc` bullets, hanging indent, no gap between items.
 - `src/components/ExhibitionLists.astro` — headings + rows: underlined name link → blue arrow →
   period. Empty group → one placeholder row `"..."`. Credits line (`footerText`) centred at the
   bottom of the section (at least one screen tall). Phone: Upcoming → Previous → credits.
 - `src/components/Arrow.astro` — inline SVG arrow, `direction` `right|down`, accent colour.
 - Loading overlay (`index.astro`): white layer with the logo; after the logo loads (max 2 s) it
   stays 800 ms, fades 500 ms, is removed. Reduced motion → removed at once. JS only.
-- `src/lib/content.ts` — data helpers + `renderCaption()` (`marked.parseInline`, blank-line
-  separated blocks wrapped in `<p>`).
-- `src/lib/blank-lines.ts` (new) — the Sätteri mdast step for editor empty lines (see above).
-- `astro.config.mjs` — `markdown.processor: satteri({ mdastPlugins: [blankLines] })`; otherwise
-  Sätteri's defaults (same output as before apart from the blank lines — compared file by file).
+- `src/lib/content.ts` — data helpers + async `renderCaption()` (Sätteri via
+  `@astrojs/markdown-satteri`, smart punctuation off).
+- `src/lib/blank-lines.ts` — Sätteri mdast steps: `blankLines` (safety net: whitespace-only
+  paragraph or lone `\` → one empty line, trailing `\` dropped, U+2028/U+2029/U+000B → dropped
+  at a line end, line break inside text), `inlineOnly` (caption), `captionOptions`.
+- `astro.config.mjs` — `markdown.processor: satteri({ mdastPlugins: [blankLines] })`.
+- `tina/rich-text.ts` — the two rich-text field definitions (`bodyField`, `captionField`) and
+  the rule sentence; imported by `tina/config.ts` and by the test.
+- `tina/admin.css` + `scripts/inject-admin-css.mjs` — editor styling for `/admin`, added to
+  `public/admin/index.html` after the Tina build. Unsupported by Tina but fail-safe: on any
+  problem it warns and leaves the admin as Tina built it.
+- `scripts/text-test.mjs` (`npm run test:text`) — Tina round trip of every tool, all artist
+  files byte for byte, and the site's rendering of the same fixtures.
+- `scripts/content-report.mjs` — lists anything outside the tool set, with file and line.
 
 ### Design tokens (`src/styles/global.css`)
 
@@ -122,8 +143,9 @@ Superfamily Variable, self-hosted `public/fonts/ABCArealSuperfamilyVariable.woff
 400–700, `slnt` 0…−12), declared as `normal` and `oblique 12deg`. `html { font-synthesis: none }`;
 every slanted text sets `oblique 12deg` explicitly ("Currently on view", phone header,
 `.prose em/i` — editor italics, also inside sub-headings). Sub-headings themselves are upright. Type sizes `clamp(phone, vw, desktop)`. Breakpoint 48rem (768 px).
-**Paragraphs have no margins** (`p`, `.prose p { margin: 0 }`): a new paragraph is a new line;
-only editor empty lines make gaps.
+**Paragraphs** (`.prose`): no margin of their own; one line (`1lh`) between neighbouring
+paragraphs and lists. `text-wrap: pretty` on paragraphs, `balance` on sub-headings and the artist
+title (Chrome/Edge, Safari 26; `balance` also Firefox).
 
 | Token | Phone → desktop | Used for |
 | --- | --- | --- |
@@ -134,7 +156,7 @@ only editor empty lines make gaps.
 | `--fs-heading` | 32 → 48 px | artist name/period, list headings, 404 |
 | `--fs-subheading` | 20 → 32 px | sub-headings in the text |
 | `--fs-row` | 16 → 32 px | list rows |
-| `--fs-body` | 16 → 24 px | body text (and blank-line height) |
+| `--fs-body` | 16 → 24 px | body text (one line = the paragraph gap) |
 | `--fs-caption` | 14 → 18 px | second-image caption |
 | `--fs-credits` | 16 → 28 px | credits line |
 | `--fs-header` | 12 px → `clamp(14px, 1.323vw, 20px)` | header pills |
@@ -165,92 +187,78 @@ order: Sabrina Gschwandtner (previous, 30 October – 6 November), **Boom! Glass
 6 – 13 November)**, Roni Kaufman (upcoming, November 13th; main + second image, caption), Helene
 Kask (November 20th), Maria Pita Guerreiro (November 27th), Joanne Grüne Yanoff (December 4th).
 
-### Verified — upright sub-headings (headless Chromium, 1512×982 and 390×844)
+### Verified — editor rework (headless Chromium, 1512×982 and 390×844)
 
-- Home `#current` (Boom! Glass Group): "LIFE ON VENUS – Celestial Body", "About BOOM!", "Om BOOM!"
-  compute `font-style: normal`, weight 700, 32 px / 20 px, margins unchanged (first 0, later
-  `1em` top, `0.3em` bottom). `/artists/sabrina-gschwandtner`: "About the works:", "About the
-  artist:" the same.
-- Test text (not committed): `### *Italic heading*` → `<h3><em>`, `oblique 12deg` / 700, the
-  font's own slanted face; `### ***Bold italic heading***` → `<em><strong>`, `oblique 12deg`,
-  `<strong>` computes 900, clamped to the font's 700 — looks identical to the italic-only one;
-  `### Upright heading` upright. `font-synthesis: none`.
-- Unchanged: "Currently on view" `oblique 12deg`; header pills `oblique 12deg` on phone, `normal`
-  on desktop; artist title upright bold; italics in body text `oblique 12deg`.
-- Console: only the 404 for Sabrina's deleted second image (Status 4), no script errors.
-
-### Verified — empty-lines fix (headless Chromium, 1512×982 and 390×844)
-
-- Home `#current`, "About BOOM!": "…chosen craft." / blank line / "We seek…promoted." / blank
-  line / "As a group…collaborations." then "BOOM! is a platform…", "We see a need…" each directly
-  under the previous, no gaps. "Om BOOM!" the same. Blank lines 26 px (desktop) / 17 px (phone),
-  equal to a one-line paragraph.
-- `/artists/sabrina-gschwandtner`: credits' hard breaks intact ("“Hand-painted Serpentine
-  Dance”, 2021." / "4k video…" on two lines); blank lines after each credit block and, newly,
-  between "…hand-colored films." and "“Hands at Work Video”, 2017.".
-- Throwaway test texts (not committed), every case from the table above plus: two `\` lines, two
-  `&#x20;` paragraphs, `text \` + `\`, `\` at the end of a paragraph, `a \` / `\` / `b`, blank
-  lines before the intro / between intro and the first sub-heading / at the end, and a text
-  without sub-heading. Result: right number of blank lines, no backslash anywhere; blank lines
-  next to the main image, at the start and at the end hidden, image gaps stay exactly 26 px.
-- Built HTML compared with a build of `origin/main`: only the three artist texts with empty
-  lines differ (smart quotes etc. unchanged).
-- Console: no script errors. The only console message is the 404 for Sabrina's deleted second
-  image (Status 4, content, not code).
+- **Gaps:** between paragraphs, before/after a list: 26.00 px desktop, 17.00 px phone (the old
+  `.blank-line` height). Main image 26 px above and below, second image 26 px above, with a
+  sub-heading, without one, and without images. No gap at the start or end of a text. Caption
+  paragraphs 20 px apart on desktop. Sub-heading margins as before (first 0 after the image,
+  later 1em top / 0.3em bottom).
+- **Migration:** Sabrina's and Boom's pages and the home page: identical `textContent`, identical
+  full-page screenshots against a build of old `main` (taken before the `text-wrap` commit).
+- **Editor (Tina local mode):** toolbar buttons as specified; site font loaded; paragraphs one
+  line apart, line breaks none; saved file and built page match the editor block for block. Real
+  clipboard paste tested with Google Docs- and Word-shaped HTML (hand-written to those shapes).
+- **Not verified here:** the live Tina Cloud admin (needs a login), and a paste from the real
+  Google Docs / Word apps.
 
 ### Workflows
 
 - `.github/workflows/deploy.yml` — on push to `main` and manual dispatch: `npm ci` →
-  configure-pages → `npx tinacms build` (secrets set) → `npx astro build` → deploy to Pages.
+  configure-pages → `npx tinacms build` → `node scripts/inject-admin-css.mjs` (both only with
+  Tina secrets) → `npx astro build` → content report → text test (both report-only, never fail
+  the deploy; the report is on the run's Summary page) → deploy to Pages.
 
 **Operational rule — how to redeploy:** Actions → "Deploy to GitHub Pages" → **Run workflow**
 (on `main`). Never "Re-run all jobs" on an old run (it redeploys that run's old commit).
 
 ## What Caspar must do (browser only)
 
-1. Actions → the newest "Deploy to GitHub Pages" runs (after `110b57b` and the heading fix) →
-   check they are green.
-2. **Italic sub-headings** (they are now upright unless the editor marks them): `/admin` →
-   **Sabrina Gschwandtner** → **Text** → select the heading text "About the works:" → italic
-   button; the same for "About the artist:" and any other heading that should be italic (e.g.
-   Boom! Glass Group's "LIFE ON VENUS – Celestial Body", "About BOOM!", "Om BOOM!" if wanted) →
-   Save. Then reopen the entry in the editor and check the heading is still italic (Tina keeps it
-   as `### *…*`); on the site it shows slanted after the deploy.
-3. Check https://thespacecraft.se → scroll to Boom! Glass Group → "About BOOM!" and "Om BOOM!"
-   look like the intended layout; https://thespacecraft.se/artists/sabrina-gschwandtner has a
-   gap between the two works.
-4. **Sabrina's second image is missing:** `/admin` → Sabrina Gschwandtner → **Second image** →
-   upload/choose the Joshua White photo again (it was deleted from Media on 2026-11-09) → Save.
-   Or clear the field if it should go.
-5. In Sabrina's **Text**, the last line ("Image features … Photo by Joshua White Photography.")
-   repeats the caption — delete it if it shouldn't be shown twice. **Links:** delete the empty
-   item (trash icon) or fill it in.
-6. Ongoing: to make a gap in a text, leave one empty line (two for a bigger gap); a new paragraph
-   without an empty line starts directly on the next line. When an exhibition ends: its
-   **Status** → *Previous*, the next → *Current* (one *Current*; lowest **Sort order** wins). Put
-   a sub-heading after the intro of each text: that's where the main image goes.
+1. **Check the editor:** open https://thespacecraft.se/admin/ → Artists → **Roni Kaufman**. The
+   **Text** box should show the site's font in a narrower column, with a clear blank line between
+   paragraphs. If it still looks like before, reload once with Ctrl+Shift+R (Cmd+Shift+R).
+2. **Type test:** in any artist's **Text**, type a paragraph, press Enter, type a second one,
+   press Shift+Enter, type a line → **Save** → wait for the deploy (Actions, about 2 minutes) →
+   compare with the page on the site: same blank line, same line break. Remove the test text.
+3. **Italic sub-heading:** select a sub-heading's text → italic button → Save → reload the admin
+   page and open the artist again: the heading should still be italic.
+4. **Paste test:** copy a few paragraphs from Google Docs, paste into **Text**, Save, compare
+   with the site. Expect plain text: one blank line between paragraphs, formatting gone.
+5. **Look at Roni, Helene and Maria** on the site: their paragraphs now have gaps. If two lines
+   should sit directly under each other, join them in the editor with Shift+Enter.
+6. **Sabrina's second image is missing:** `/admin` → Sabrina Gschwandtner → **Second image** →
+   upload/choose the photo again → Save. Or clear the field.
+7. In Sabrina's **Text**, the last line repeats the caption: delete it if it shouldn't show
+   twice. **Links:** delete the empty item (trash icon) or fill it in.
+8. Ongoing: when an exhibition ends, its **Status** → *Previous*, the next → *Current*. Put a
+   sub-heading after the intro of each text: that's where the main image goes.
+
+If anything in the editor looks wrong, nothing is lost: the styling is cosmetic and the saved
+text is unaffected. Say so in the Project chat, or roll back (above).
 
 ## In progress
 
-- Nothing. Waiting on Caspar's `/admin` edits (italic headings, Sabrina's image).
+- Nothing. Waiting on Caspar's checks above.
 
 ## Next steps
 
-1. Check today's deploys, italicise the sub-headings that should be italic, restore Sabrina's
-   second image.
+1. Caspar's checklist; fix whatever the live admin shows differently from the local test.
 2. Unpin `@tinacms/cli` / remove the `@tinacms/graphql` override, regenerate
-   `tina/tina-lock.json`, verify CI's Tina step (own session, on a green `main`).
+   `tina/tina-lock.json`, verify CI's Tina step (own session, on a green `main`). After any Tina
+   update: run `npm run test:text` and re-check the editor styling.
 3. Later: first light visual as a client-only island in `src/components/visual/`.
 
 ## Open questions for Caspar
 
+- **Quotes in captions:** in the text, straight quotes become curly (" → “ ”) automatically; in
+  captions they stay as typed. Make captions curly too? (It would change Sabrina's caption.)
+- **Editor text size:** 20 px in the editor (site: 24 px on a wide screen). Bigger, smaller?
+- **Maria's "●":** now that there is a bullet-list button, should that line be a real list?
 - **Image cropping:** main image square, second image 720 × 822. OK, or show whole artworks?
 - **Social links:** `socialLinks` exists in Site settings but isn't shown. Keep or drop?
 - **`/artists` page:** nothing links to it. Keep as a hidden overview, or remove?
 - **Drop `imageSide`?** It no longer does anything. Remove from both schemas and the content?
 - **Loading overlay on phone:** logo keeps 5 px side padding. Should it be 20 px?
-- **Blank lines in captions:** the second-image caption (rendered with `marked`) doesn't get the
-  empty-line handling; a blank line there separates paragraphs without a gap. Needed?
 
 ## Known issues
 
@@ -260,9 +268,14 @@ Kask (November 20th), Maria Pita Guerreiro (November 27th), Joanne Grüne Yanoff
   matters: GitHub → repo Settings → Collaborators → add their account (Write).
 - **`@astrojs/markdown-satteri` is pinned to `0.4.4`**, the version `astro` 7.4.1 uses. Bump it
   together with `astro`, or two copies end up installed.
-- **`:has()` required** for the image position and for hiding blank lines next to images (all
-  current browsers). Older browsers show the text in order with the main image above it, and all
-  blank lines.
+- **Tina does not save an empty paragraph or a trailing Shift+Enter.** The editor shows them,
+  the site cannot. The editor labels the empty paragraph.
+- **The editor styling depends on Tina's markup** (`[data-slate-editor]`, `.slate-p`). A Tina
+  update can silently switch it off (the editor then looks like Tina's default; nothing breaks).
+- **`maria-pita-guerreiro.md`:** its next save in `/admin` removes three trailing spaces. Harmless.
+- **`:has()` required** for the image position and the 26 px image gaps (all current browsers).
+  Older browsers show the text in order with the main image above it.
+- **`1lh` unit** (Chrome 109, Safari 16.4, Firefox 120); older browsers use `1.0833em`.
 - **`scroll-margin-top` deliberately not added** to `#current` / `#exhibitions` (see DECISIONS).
 - **Font path:** `@font-face` uses `/fonts/…` (root-relative) — fine on the custom domain.
 - **Tina packages are pinned:** `@tinacms/cli` `4.0.3` + `overrides` `@tinacms/graphql` `4.0.1`.
@@ -309,7 +322,7 @@ No forwarding rules. Untouched: `_dmarc` TXT, `_domainconnect` CNAME.
 
 - Production: https://thespacecraft.se (admin: https://thespacecraft.se/admin/)
 - https://bromsc.github.io/spacecraft-site/ → redirects to the domain.
-- `main`: `c55c1b1` (PR #4 merge, 2026-11-10) → `110b57b` (empty lines) → the heading fix. PR #3
-  merge `84ab069` (2026-11-02), PR #2 `4c869a2` (2026-10-30). Deploy runs were not checked this
-  session.
+- `main`: PR #5 merge (2026-11-10, editor rework) on top of `77102c8`. Earlier: `1e79d23`
+  (upright headings), `110b57b` (empty lines), PR #4 `c55c1b1`, PR #3 `84ab069`.
+- Rollback point: branch `pre-editor-rework` = `77102c8`.
 - Deploy runs: https://github.com/BromsC/spacecraft-site/actions

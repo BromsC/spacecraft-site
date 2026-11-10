@@ -491,3 +491,146 @@ Format: date · decision · why · alternatives rejected.
 - **Rejected:** Keeping the forced oblique (editor/site mismatch); slanting headings in the Tina
   editor instead (the admin's styling is Tina's, not ours); a separate "italic heading" field
   (the italic button already expresses it).
+
+## 2026-11-10 — One text rule: Enter = paragraph = one blank line, Shift+Enter = line break (supersedes the margin-less part of "Empty lines from the editor render as one blank line; paragraphs stay margin-less")
+
+- **Decision:** One rule, in the `/admin` editor and on the site. **Enter** starts a new
+  paragraph, shown with exactly one blank line above it. **Shift+Enter** starts a new line
+  directly underneath, no gap. There is no "empty line" tool any more. On the site the gap is a
+  CSS margin: `.prose > :is(p, ul, ol) + :is(p, ul, ol) { margin-top: 1lh }` (fallback
+  `1.0833em`), top only and only between neighbours, so a text never starts or ends with a gap.
+  Measured in headless Chromium: 26 px at 1512×982, 17 px at 390×844, equal to the old
+  `.blank-line`; in the caption one caption line (20 px desktop). Sub-heading margins unchanged.
+- **Artist block:** `.feature__body` is `display: contents` and the visual order comes from CSS
+  `order`, so the element after the main image is not its DOM neighbour. Whatever follows the
+  image (the first sub-heading; without one the second paragraph) gets `margin-top: 0`, and the
+  gaps above/below the main image and above the second image stay exactly 26 px (measured with
+  and without a sub-heading, with and without images). That zero now only applies when there is
+  a main image: before, an intro followed by a first sub-heading without a main image had no gap
+  at all. No current page is affected.
+- **The site renders what is saved.** A break at the start of a paragraph, or several in a row,
+  show as that many lines (plain `<br>`). `src/lib/blank-lines.ts` stays as the safety net: a
+  whitespace-only paragraph (`&#x20;`) or a lone `\` between empty lines becomes a paragraph of
+  one empty line (`<p><br></p>`); a `\` at the very end of a paragraph is dropped; a backslash
+  can never reach the page. The `.blank-line` class and the CSS that hid blank lines next to
+  images are removed (dead).
+- **Bullet lists** (new tool): body size, `disc` bullets, `padding-left: 1.2em` (hanging
+  indent), one-line gap above and below like a paragraph, none between items.
+- **Migration:** only `sabrina-gschwandtner.md` and `boom-glass-group.md` were rewritten, by
+  script, structure only: lines that had no gap are joined with hard breaks (`\` at the end of
+  the line), each lone `\` line and the `&#x20;` paragraph became a paragraph boundary, existing
+  hard breaks stay. Proven: the bodies are identical once `\`, newlines and `&#x20;` are
+  removed; `textContent` of both artist blocks identical; full-page screenshots pixel-identical
+  to `main` at both viewports (before the `text-wrap` commit). Roni, Helene and Maria were not
+  edited and gain gaps between paragraphs (intended).
+- **Why:** A curator could not tell where a gap would appear: the site drew paragraphs with no
+  margin while the editor drew them 8 px apart. Now a paragraph looks like a paragraph in both.
+- **Rejected:** keeping margin-less paragraphs and teaching "empty lines" (Tina does not save an
+  empty paragraph, see below); `margin-bottom` or `gap` (would add to the image gaps and to the
+  end of the text); a fixed px gap (must follow the type size).
+
+## 2026-11-10 — Round-trip test against Tina's own serializer; results
+
+- **Decision:** `scripts/text-test.mjs` (`npm run test:text`, no new dependency) runs
+  `@tinacms/mdx` `parseMDX` → `serializeMDX` → `parseMDX` with the real field definitions, which
+  now live in `tina/rich-text.ts` (imported by `tina/config.ts` and by the test). It also runs
+  every artist file through `@tinacms/graphql`'s `parseFile` / `stringifyFile` byte for byte,
+  and renders the same fixtures with the site's Markdown step. In CI it is a report-only step.
+- **Results (tinacms 3.15.0, @tinacms/mdx 2.4.1), all unchanged after a round trip:** paragraphs;
+  line break mid-paragraph; two breaks in a row; paragraph starting with a break; `###`
+  sub-heading; bold; italic; bold+italic; link; bullet list (`* item`); `### *italic heading*`;
+  `### ***bold italic***`; `&#x20;` paragraph; caption italic / link / two paragraphs / break.
+  **Italic inside a sub-heading survives**, so sub-headings are not forced upright.
+- **Known Tina behaviour (asserted in the test):** an empty paragraph (Enter twice) is not
+  saved; a line break at the end of a paragraph is not saved (`trimTrailingBreaks`); a paragraph
+  holding only a break is not saved; a break at the start of a paragraph is saved as a lone `\`
+  line; a one-space paragraph is saved as `&#x20;`; U+2028 and U+000B are kept as typed; a
+  hand-written lone `\` between empty lines is a literal backslash to Tina.
+- **Files:** Boom, Helene, Joanne, Roni and Sabrina are unchanged by a save.
+  `maria-pita-guerreiro.md` is not: its next save in `/admin` removes three trailing spaces
+  (after "SUN THERAPY" and at the end of two paragraphs). Harmless; the file was not edited.
+- **Consequence for editors:** two things the editor can show are never saved, so the site
+  cannot show them: an empty paragraph and a Shift+Enter at the very end of a paragraph. The
+  editor stylesheet labels an empty paragraph "empty paragraph: not saved".
+
+## 2026-11-10 — Caption through the same Markdown processor; `marked` removed (supersedes "Second-image caption field, rendered with `marked`", 2026-11-02)
+
+- **Decision:** `renderCaption()` renders `btsCaption` with
+  `createSatteriMarkdownProcessor()` from `@astrojs/markdown-satteri` (already a direct
+  dependency, the processor Astro uses for the text) and the same `blankLines` step, plus
+  `inlineOnly`, which turns headings, lists, quotes and code typed by hand into plain
+  paragraphs, so the output stays paragraphs with inline formatting. `marked` is uninstalled.
+  `renderCaption` is now async. The field itself is unchanged except the toolbar (below).
+- **Smart punctuation is off for captions** (`features.smartPunctuation: false`), on for the
+  text as before. With it on, Sabrina's caption `"Hands at Work Video,"` would get curly quotes,
+  a visible character change this session was not allowed to make. Open question for Caspar.
+- **Why:** one pipeline, one rule, one set of fixtures; one dependency fewer.
+- **Rejected:** keeping `marked` (a second Markdown engine with its own break/paragraph rules).
+
+## 2026-11-10 — Toolbar: bullet list added, caption italic + link only (supersedes the toolbar part of "One text field per artist, floats for the 'clean cut'", 2026-10-30)
+
+- **Decision:** "Text": `['heading', 'bold', 'italic', 'link', 'ul']`, heading level `h3` only.
+  "Second image caption": `['italic', 'link']` (bold dropped). No underline, no numbered list.
+  Both descriptions carry the sentence "Enter starts a new paragraph with a blank line above it.
+  Shift+Enter starts a new line without a gap." `tina/tina-lock.json` regenerated (schema
+  version still 4.0.1; only these two fields differ). Checked in the running local admin: the
+  toolbars show exactly these buttons.
+- **Why:** the tool set is what the site styles and what the round-trip test covers.
+
+## 2026-11-10 — Editor stylesheet injected into the built admin page (unsupported by Tina, fail-safe)
+
+- **Decision:** `tina/admin.css` restyles only the rich-text editing area of `/admin`: the
+  site's font (same `@font-face`, base path filled in), 20 px, at most the site's 710 px column,
+  one line between paragraphs (`1lh`), none for a line break, sub-headings bold/upright/larger,
+  italics `oblique 12deg`, underlined links, real bullets, and the "empty paragraph: not saved"
+  label. `scripts/inject-admin-css.mjs` writes it as one `<style>` block before `</head>` of
+  `public/admin/index.html`; `deploy.yml` runs it right after `npx tinacms build`, under the
+  same condition.
+- **Selectors:** from the real editor DOM (local admin, headless Chromium), Slate/Plate's own
+  hooks only: `[data-slate-editor][data-slate-node='value']`, `.slate-p`, `br`, `h3`, `ul`,
+  `li`, `a`, `strong`, `em`, `[data-slate-zero-width]`. No Tailwind utility classes.
+- **Unsupported but fail-safe:** Tina has no option for editor styling, so this edits a
+  generated file. The script never throws and always exits 0; if the page or `</head>` is
+  missing it prints a warning and the admin stays as Tina built it. It is idempotent (tested:
+  run twice → one block; missing file and unexpected markup → warning, exit 0). If a Tina update
+  renames the hooks, the rules stop matching and the editor looks like Tina's default again.
+- **Verified in Tina's local mode** (`tinacms dev`, no Tina Cloud credentials): typed two
+  paragraphs, a Shift+Enter line, an empty paragraph, a leading and a trailing break; saved;
+  built. Editor and page have the same blocks and a one-line gap between them (editor 22 px at
+  20 px type, page 26 px at 24 px). Differences, both because Tina does not save them: the empty
+  paragraph and the trailing break.
+- **Rejected:** Tina visual editing (needs an SSR adapter and React pages; the site is static on
+  GitHub Pages); an own editor as a Tina custom field (a second editor to maintain, and it would
+  still have to write Tina's Markdown); block-based text (a list of paragraph objects: exact,
+  but pasting a text would mean one block per paragraph by hand).
+
+## 2026-11-10 — Paste results; render-time clean-up extended to U+000B
+
+- **Tested:** real clipboard paste (Ctrl+V, `text/html` + `text/plain` on the clipboard) into
+  the local admin with Google Docs-shaped and Word-shaped HTML (heading, bold, italic, link,
+  empty paragraphs, soft return, list). The clipboard HTML was written by hand in the shape those
+  apps produce, not copied from the apps.
+- **Result:** the editor received both formats and **pasted plain text only**. Every line
+  becomes its own paragraph; bold, italic, links, headings and lists are lost (formatting must
+  be re-applied in the editor); empty lines become empty paragraphs, which are not saved, so a
+  pasted text gets exactly one blank line between paragraphs whether or not the source had empty
+  lines. Word list items arrive as paragraphs starting with "·" and spaces. A soft return
+  (Shift+Enter in the source) arrives as U+000B, a U+2028 stays U+2028; Tina saves both as is.
+- **Decision:** the render-time clean-up handles U+2028, U+2029 and U+000B: at the end of a line
+  dropped, inside text a line break. Files are untouched. Nothing else is cleaned: "·" bullets
+  are shown as pasted and listed by the content report.
+- **Content report:** `scripts/content-report.mjs` writes to the deploy job summary every
+  construct outside the tool set in `content/artists` (other heading levels, numbered lists,
+  quotes, tables, images, code, raw HTML, strikethrough, rules; bold/headings/lists in a
+  caption) with file and line, plus what is repaired automatically. Always exits 0.
+
+## 2026-11-10 — `text-wrap: pretty` / `balance`
+
+- **Decision:** `.prose p { text-wrap: pretty }`; sub-headings and `.feature__title`
+  `text-wrap: balance`. No hyphenation (texts mix Swedish and English).
+- **Support (MDN browser-compat-data, read 2026-11-10; caniuse.com was not reachable):**
+  `balance`: Chrome/Edge 114, Firefox 121, Safari 17.5. `pretty`: Chrome/Edge 117, Safari 26,
+  Firefox not supported. Browsers without it wrap as before; nothing depends on it.
+- **Effect:** some lines break differently in Chromium (e.g. no single word alone on a last
+  line). This is the only reason Sabrina's and Boom's pages are no longer pixel-identical to
+  the old `main`.
