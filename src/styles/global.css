@@ -38,6 +38,7 @@
   --fs-subheading: clamp(20px, 2.116vw, 32px);
   --fs-row: clamp(16px, 2.116vw, 32px);
   --fs-body: clamp(16px, 1.587vw, 24px);
+  --fs-caption: clamp(14px, 1.19vw, 18px); /* one step below body: image captions */
   --fs-credits: clamp(16px, 1.852vw, 28px);
   --fs-header: 12px;
 
@@ -77,6 +78,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Never fake bold or italic: ABC Areal has real weights (400–700) and a real slant. */
+  font-synthesis: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -126,6 +129,13 @@ p {
 
 .prose a {
   text-decoration: underline;
+}
+
+/* Italics from the editor use the font's own slanted design (the oblique @font-face), not the
+   browser's `italic` matching. */
+.prose em,
+.prose i {
+  font-style: oblique 12deg;
 }
 
 .prose p,
@@ -434,7 +444,7 @@ p {
 .feature__caption {
   order: 6;
   margin-top: 8px;
-  font-size: var(--fs-body);
+  font-size: var(--fs-caption);
   text-align: left;
 }
 
