@@ -75,6 +75,7 @@ check(saved(p(br(), t('Two.'))) === '\\\nTwo.\n', 'a line break at the start of 
 check(saved(p(t(' '))) === '&#x20;\n', 'a paragraph holding one space is saved as &#x20;');
 check(show(parse('One.\n\n\n\nTwo.\n', bodyField)) === show(parse('One.\n\nTwo.\n', bodyField)), 'extra empty lines in a file are one paragraph boundary');
 check(stringify(parse('One.\u2028\n\nTwo\u2028three.\n', bodyField), bodyField) === 'One.\u2028\n\nTwo\u2028three.\n', 'U+2028 is kept as typed (cleaned at render time only)');
+check(stringify(parse('One.\u000BTwo.\n', bodyField), bodyField) === 'One.\u000BTwo.\n', 'U+000B is kept as typed (cleaned at render time only)');
 check(stringify(parse('One.\n\n\\\n\nTwo.\n', bodyField), bodyField) === 'One.\n\n\\\\\n\nTwo.\n', 'hand-written lone "\\" between empty lines is a literal backslash to Tina (the site shows an empty line)');
 
 // --- 3. Content files, byte for byte -------------------------------------------------------------
@@ -117,6 +118,7 @@ const RENDER = [
   ['"\\" at the end of a paragraph is dropped', 'One. \\\n\nTwo.\n', '<p>One.</p><p>Two.</p>'],
   ['U+2028 at the end of a line is dropped', 'One. \u2028\n\nTwo.\u2029\n', '<p>One.</p><p>Two.</p>'],
   ['U+2028 inside text is a line break', 'One\u2028two.\n', '<p>One<br>two.</p>'],
+  ['U+000B (Word soft return, as pasted) inside text is a line break', 'One.\u000BTwo.\n', '<p>One.<br>Two.</p>'],
   ['U+2028 before a hard break is dropped', 'One.\u2028\\\ntwo.\n', '<p>One.<br>two.</p>'],
 ];
 for (const [name, md, expected] of RENDER) {

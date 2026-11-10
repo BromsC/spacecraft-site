@@ -48,12 +48,29 @@ jobs:
         if: ${{ env.TINA_CLIENT_ID != '' }}
         run: npx tinacms build
 
+      # Makes the /admin text editor look like the site (tina/admin.css). Never fails the build:
+      # if Tina's page changes shape it prints a warning and the admin stays as Tina built it.
+      - name: Style the admin editor
+        if: ${{ env.TINA_CLIENT_ID != '' }}
+        run: node scripts/inject-admin-css.mjs
+
       - name: Skip Tina admin (no TINA_CLIENT_ID secret)
         if: ${{ env.TINA_CLIENT_ID == '' }}
         run: echo "::notice::TINA_CLIENT_ID secret not set — building site without /admin."
 
       - name: Build site
         run: npx astro build
+
+      # Report only, never fails the deploy: anything in the artist texts outside the editor's
+      # tool set, and whether editor and site still agree (Tina round trip + site rendering).
+      - name: Content report
+        if: ${{ always() }}
+        continue-on-error: true
+        run: node scripts/content-report.mjs
+
+      - name: Text rule test (report only)
+        continue-on-error: true
+        run: npm run test:text
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

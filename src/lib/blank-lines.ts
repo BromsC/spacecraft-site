@@ -13,8 +13,9 @@ import type { MdastPluginDefinition } from 'satteri';
 //     empty line: `<p><br></p>`;
 //   - a `\` at the very end of a paragraph (literal in Markdown) is dropped, so a backslash can
 //     never reach the page;
-//   - paste leftovers U+2028 / U+2029 (line / paragraph separator, e.g. from Word or a PDF): at
-//     the end of a line they are dropped, inside text they become a line break.
+//   - paste leftovers U+2028 / U+2029 (line / paragraph separator, e.g. from a PDF) and U+000B
+//     (Word's manual line break; the editor pastes plain text and keeps it): at the end of a
+//     line they are dropped, inside text they become a line break.
 // Content files are never changed by this; it only runs at build time.
 
 interface Inline {
@@ -23,10 +24,10 @@ interface Inline {
   children?: Inline[];
 }
 
-const SEPARATORS = /[\u2028\u2029]/;
+const SEPARATORS = /[\u2028\u2029\u000B]/;
 const brk = (): Inline => ({ type: 'break' });
 
-// Split text at U+2028/U+2029. `atEnd`: nothing but a line end follows this text node.
+// Split text at a separator character. `atEnd`: nothing but a line end follows this text node.
 function splitSeparators(value: string, atEnd: boolean): Inline[] {
   const out: Inline[] = [];
   const parts = value.split(SEPARATORS);

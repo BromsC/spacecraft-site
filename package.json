@@ -13,6 +13,7 @@
     "build:site": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test:text": "node scripts/text-test.mjs",
     "astro": "astro",
     "tinacms": "tinacms"
   },
