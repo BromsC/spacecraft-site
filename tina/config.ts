@@ -1,4 +1,5 @@
 import { defineConfig, type Template } from 'tinacms';
+import { bodyField, captionField } from './rich-text';
 
 // Slugify helper used for artist filenames.
 // The filename IS the URL slug: content/artists/jane-doe.md → /artists/jane-doe
@@ -155,34 +156,14 @@ export default defineConfig({
             ],
           },
           { type: 'image', name: 'mainImage', label: 'Main image' },
-          {
-            type: 'rich-text',
-            name: 'body',
-            label: 'Text',
-            isBody: true,
-            description: "Sub-headings (e.g. 'About the works:') are headings in the editor.",
-            // One heading level only: h3 sits below the artist name (h1 on the artist page, h2 on
-            // the home page). All headings in the text are styled the same anyway.
-            overrides: {
-              toolbar: ['heading', 'bold', 'italic', 'link'],
-              headingLevels: ['h3'],
-            },
-          },
+          bodyField,
           {
             type: 'image',
             name: 'btsImage',
             label: 'Second image',
             description: 'Shown below the whole text, at full column width.',
           },
-          {
-            type: 'rich-text',
-            name: 'btsCaption',
-            label: 'Second image caption',
-            description:
-              'Shown under the second image, e.g. "Image features …, 2017. Photo by …". Use the italic button for italics.',
-            // Not isBody: Tina stores it as a Markdown string in the frontmatter.
-            overrides: { toolbar: ['bold', 'italic', 'link'] },
-          },
+          captionField,
           {
             type: 'object',
             name: 'links',

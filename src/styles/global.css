@@ -144,6 +144,27 @@ p {
   margin: 0;
 }
 
+/* The text rule, the same as in the /admin editor (tina/admin.css):
+     Enter       = new paragraph = exactly one blank line (one line of the text's own size);
+     Shift+Enter = line break (<br>), no gap.
+   Margin on the top only, and only between neighbours, so there is never a gap at the start or
+   the end of a text. A list counts as a paragraph. Sub-headings keep their own margins below.
+   `1lh` is one line box; the `em` value is the same height for browsers without `lh`. */
+.prose > :is(p, ul, ol) + :is(p, ul, ol) {
+  margin-top: 1.0833em;
+  margin-top: 1lh;
+}
+
+/* Bullet lists: body size, real bullets hanging in the margin of the text, no gap between
+   items. */
+.prose :is(ul, ol) {
+  padding-left: 1.2em;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
 /* Sub-headings in the text ("About the works:"). Every level looks the same: bold and upright, as
    in the editor; italic only where the editor sets it (`<em>`, see above). In the artist block
    the first sub-heading also marks where the main image goes (see .feature__body). */
@@ -384,7 +405,8 @@ p {
    grid items and can be ordered individually:
      1 title · 2 intro (text before the first sub-heading) · 3 main image ·
      4 rest of the text (first sub-heading onwards) · 5 second image · 6 caption · 7 extra
-   Without any sub-heading the intro is the first paragraph. Needs `:has()` (all current
+   Without any sub-heading the intro is the first paragraph. Gaps between paragraphs come from
+   the `.prose` rule above (grid items keep their margins). Needs `:has()` (all current
    browsers); without it everything after the title still shows, only the main image moves to
    the top of the text. */
 
@@ -415,25 +437,17 @@ p {
   order: 2;
 }
 
-/* No sub-heading at all: the main image goes after the first paragraph (blank lines before it
-   don't count). */
-.feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > :not(:not(.blank-line) ~ *) {
+/* No sub-heading at all: the main image goes after the first paragraph. */
+.feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > :first-child {
   order: 2;
 }
 
-/* The first sub-heading follows the main image directly: the image's margin is the gap. */
-.feature__body > :is(h1, h2, h3, h4, h5, h6):not(:is(h1, h2, h3, h4, h5, h6) ~ *) {
+/* Whatever follows the main image directly (the first sub-heading, or without one the second
+   paragraph) has no top margin: the image's own 26 px is the gap. DOM neighbours are not visual
+   neighbours here, so the paragraph gap is taken off by hand. */
+.feature:has(> .feature__image) .feature__body > :is(h1, h2, h3, h4, h5, h6):not(:is(h1, h2, h3, h4, h5, h6) ~ *),
+.feature:has(> .feature__image) .feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > :nth-child(2) {
   margin-top: 0;
-}
-
-/* Blank lines from the editor (`.blank-line`, one line tall; see src/lib/blank-lines.ts) are not
-   shown where the layout already has a gap: at the start of the text (title gap), at the end
-   (second image / links), and right above or below the main image. */
-.feature__body > .blank-line:not(:not(.blank-line) ~ *),
-.feature__body > .blank-line:not(:has(~ :not(.blank-line))),
-.feature__body:has(:is(h1, h2, h3, h4, h5, h6)) > .blank-line:not(:is(h1, h2, h3, h4, h5, h6) ~ *):not(:has(~ :not(.blank-line, :is(h1, h2, h3, h4, h5, h6), :is(h1, h2, h3, h4, h5, h6) ~ *))),
-.feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > .blank-line:not(:not(.blank-line) ~ :not(.blank-line) ~ *) {
-  display: none;
 }
 
 .feature__image {
@@ -458,10 +472,6 @@ p {
   margin-top: 8px;
   font-size: var(--fs-caption);
   text-align: left;
-}
-
-.feature__caption p {
-  margin: 0;
 }
 
 .feature__extra {

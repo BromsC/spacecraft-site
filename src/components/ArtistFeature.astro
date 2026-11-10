@@ -23,7 +23,7 @@ const Heading = headingLevel === 1 ? 'h1' : 'h2';
 const { name, period, mainImage, btsImage, btsCaption } = artist.data;
 const { Content } = await render(artist);
 // Caption only belongs to the second image.
-const caption = btsImage ? renderCaption(btsCaption) : undefined;
+const caption = btsImage ? await renderCaption(btsCaption) : undefined;
 const hasExtra = Astro.slots.has('default');
 ---
 
