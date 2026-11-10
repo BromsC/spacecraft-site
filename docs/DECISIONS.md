@@ -436,3 +436,36 @@ Format: date · decision · why · alternatives rejected.
   doesn't have; see the 2026-10-27 font entry); `font-synthesis: none` alone (would leave `<em>`
   with `italic`, which still matches the oblique face, but its slant angle would be implicit,
   not stated); a caption size in `em` (the token keeps all type sizes in one place).
+
+## 2026-11-10 — Empty lines from the editor render as one blank line; paragraphs stay margin-less
+
+- **Decision:** An empty line left in the `/admin` editor shows on the site as exactly one blank
+  line of body text; every other paragraph keeps `margin: 0` (a new paragraph is just a new
+  line). A small Markdown step, `src/lib/blank-lines.ts`, registered in `astro.config.mjs` as
+  `markdown.processor: satteri({ mdastPlugins: [blankLines] })`, turns each empty line into its
+  own `<p class="blank-line"><br></p>`. The `<br>` gives it the height of one line at the
+  paragraph's own font size and line height (26 px desktop / 17 px phone), so no CSS sets a
+  height. In the artist block, blank lines are hidden (`display: none`, `global.css`) at the start
+  and end of the text and directly above/below the main image, where the layout already has a
+  gap (title margin, 26 px image margins, second image).
+- **How the `\` is handled:** Tina writes an empty line as a line holding only `\`. Checked in
+  the built HTML of Astro 7's Markdown processor (Sätteri): followed directly by text (all current
+  content) it is a hard break at the start of the next paragraph, `<p><br>We seek…</p>`; between
+  blank lines it is a literal `<p>\</p>`; two such lines before text are `<br><br>`. An empty
+  paragraph saved as `&#x20;` (Sabrina's text) renders `<p> </p>`, 0 px tall. The step counts
+  each `\` on its own line (and each whitespace-only paragraph) as one blank line, splits leading
+  and trailing ones off into `.blank-line` paragraphs, and drops a stray `\` at the very end of a
+  paragraph. Hard breaks inside a paragraph (`text \` + next line, e.g. work credits) are kept.
+  No backslash can reach the page.
+- **New dependency:** `@astrojs/markdown-satteri`, pinned exactly to `0.4.4`, the same version
+  `astro` 7.4.1 pins internally (it was already installed; this only makes it a direct
+  dependency, required to pass plugins to Sätteri). Bump it together with `astro`.
+- **Why:** Editors use empty lines for spacing; most already showed (leading `<br>`), but the
+  `&#x20;` form showed nothing and a lone `\` between blank lines would print a backslash.
+  Normalising at render time gives one predictable element for all forms, and the `<br>` makes
+  the height right in every browser without `lh` units.
+- **Rejected:** Paragraph margins / a `--para-gap` token (changes every paragraph; Caspar wants
+  only the editor's empty lines to make gaps); CSS only (`p:empty` / `min-height: 1lh`) — cannot
+  match a whitespace-only `<p> </p>` or remove a literal `\`; `@astrojs/markdown-remark` +
+  a remark plugin (Astro 7 no longer uses remark by default: a second Markdown engine for one
+  step); string-replacing the rendered HTML (fragile).

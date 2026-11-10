@@ -17,6 +17,7 @@
     "tinacms": "tinacms"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "0.4.4",
     "astro": "^7.4.1",
     "marked": "^18.1.2",
     "react": "^19.3.1",

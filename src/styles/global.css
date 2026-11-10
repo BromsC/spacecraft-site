@@ -414,14 +414,25 @@ p {
   order: 2;
 }
 
-/* No sub-heading at all: the main image goes after the first paragraph. */
-.feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > :first-child {
+/* No sub-heading at all: the main image goes after the first paragraph (blank lines before it
+   don't count). */
+.feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > :not(:not(.blank-line) ~ *) {
   order: 2;
 }
 
 /* The first sub-heading follows the main image directly: the image's margin is the gap. */
 .feature__body > :is(h1, h2, h3, h4, h5, h6):not(:is(h1, h2, h3, h4, h5, h6) ~ *) {
   margin-top: 0;
+}
+
+/* Blank lines from the editor (`.blank-line`, one line tall; see src/lib/blank-lines.ts) are not
+   shown where the layout already has a gap: at the start of the text (title gap), at the end
+   (second image / links), and right above or below the main image. */
+.feature__body > .blank-line:not(:not(.blank-line) ~ *),
+.feature__body > .blank-line:not(:has(~ :not(.blank-line))),
+.feature__body:has(:is(h1, h2, h3, h4, h5, h6)) > .blank-line:not(:is(h1, h2, h3, h4, h5, h6) ~ *):not(:has(~ :not(.blank-line, :is(h1, h2, h3, h4, h5, h6), :is(h1, h2, h3, h4, h5, h6) ~ *))),
+.feature__body:not(:has(:is(h1, h2, h3, h4, h5, h6))) > .blank-line:not(:not(.blank-line) ~ :not(.blank-line) ~ *) {
+  display: none;
 }
 
 .feature__image {
