@@ -2,9 +2,13 @@
 
 ## Last updated
 
-2026-11-10 — Empty-lines fix (Claude Code): empty lines left in the `/admin` editor now show on
-the site as exactly one blank line (`src/lib/blank-lines.ts`, a Sätteri Markdown step, plus a few
-CSS rules). Paragraphs otherwise stay margin-less. No schema or content change.
+2026-11-10 — Two small fixes (Claude Code), no schema or content change:
+1. Empty lines left in the `/admin` editor show on the site as exactly one blank line
+   (`src/lib/blank-lines.ts`, a Sätteri Markdown step, plus a few CSS rules); paragraphs
+   otherwise stay margin-less. Commit `110b57b`, pushed to `main`.
+2. Sub-headings in artist texts are bold and **upright** (no forced oblique), as the editor shows
+   them; a heading is italic only where the editor sets italic. CSS only. Commit
+   `fix: upright sub-headings, italic only from the editor`.
 
 ## Status summary
 
@@ -12,9 +16,11 @@ CSS rules). Paragraphs otherwise stay margin-less. No schema or content change.
    block, 20 px phone padding, "Second image caption" field, empty-link fix) merged 2026-11-02
    (`84ab069`). PR #4 (caption size `--fs-caption` + real italics) merged 2026-11-10
    (`c55c1b1`). Both are live (per Caspar).
-2. **This fix** is on top of `c55c1b1`: `npm run build:site` and `npx astro check` pass with 0
-   errors, 0 warnings, 0 hints; checked in headless Chromium at 1512×982 and 390×844 (see
-   "Verified"). Commit `fix: render editor empty lines as one blank line`.
+2. **Today's fixes** are on top of `c55c1b1`: empty lines `110b57b`, then the heading fix on top
+   of `110b57b`. `npm run build:site` and `npx astro check` pass with 0 errors, 0 warnings,
+   0 hints; both checked in headless Chromium at 1512×982 and 390×844 (see "Verified").
+   **Sub-headings that should be italic now need the italic button in `/admin`** (see "What
+   Caspar must do").
 3. **Content (from `/admin`, 2026-11-06 … 11-09):** Boom! Glass Group is now *current*
    (6 – 13 November), Sabrina Gschwandtner *previous*. Roni Kaufman has images + caption.
 4. **Broken image on Sabrina's page:** her second image file
@@ -90,8 +96,10 @@ directly above/below the main image (the layout already has a gap there). Detail
     8 px below it.
   - Phone: same order. Title centred, 17 px to the intro; main image 133 px square, centred,
     26 px above/below; second image full column width, 26 px below the text; caption 8 px below.
-  - First sub-heading: top margin 0 (the image's 26 px is the gap); later sub-headings `1em` top
-    / `0.3em` bottom.
+  - Sub-headings (`.prose h1`–`h6`, all levels alike): `--fs-subheading` (20 → 32 px), bold,
+    **upright**; italic only where the editor set it (`<h3><em>…</em></h3>` → `oblique 12deg`).
+    First sub-heading: top margin 0 (the image's 26 px is the gap); later ones `1em` top /
+    `0.3em` bottom.
   - Caption (`.feature__caption.prose`): `btsCaption` rendered to inline HTML (`marked`), only if
     `btsImage` is set and the caption is non-empty. `--fs-caption` (14 → 18 px), left-aligned,
     italics as `oblique 12deg`.
@@ -112,8 +120,8 @@ directly above/below the main image (the layout already has a gap there). Detail
 White background, black text, one accent `--color-accent: #0000ff` (arrows only). Font: ABC Areal
 Superfamily Variable, self-hosted `public/fonts/ABCArealSuperfamilyVariable.woff2` (`wght`
 400–700, `slnt` 0…−12), declared as `normal` and `oblique 12deg`. `html { font-synthesis: none }`;
-every slanted text sets `oblique 12deg` explicitly (sub-headings, "Currently on view", phone
-header, `.prose em/i`). Type sizes `clamp(phone, vw, desktop)`. Breakpoint 48rem (768 px).
+every slanted text sets `oblique 12deg` explicitly ("Currently on view", phone header,
+`.prose em/i` — editor italics, also inside sub-headings). Sub-headings themselves are upright. Type sizes `clamp(phone, vw, desktop)`. Breakpoint 48rem (768 px).
 **Paragraphs have no margins** (`p`, `.prose p { margin: 0 }`): a new paragraph is a new line;
 only editor empty lines make gaps.
 
@@ -157,6 +165,20 @@ order: Sabrina Gschwandtner (previous, 30 October – 6 November), **Boom! Glass
 6 – 13 November)**, Roni Kaufman (upcoming, November 13th; main + second image, caption), Helene
 Kask (November 20th), Maria Pita Guerreiro (November 27th), Joanne Grüne Yanoff (December 4th).
 
+### Verified — upright sub-headings (headless Chromium, 1512×982 and 390×844)
+
+- Home `#current` (Boom! Glass Group): "LIFE ON VENUS – Celestial Body", "About BOOM!", "Om BOOM!"
+  compute `font-style: normal`, weight 700, 32 px / 20 px, margins unchanged (first 0, later
+  `1em` top, `0.3em` bottom). `/artists/sabrina-gschwandtner`: "About the works:", "About the
+  artist:" the same.
+- Test text (not committed): `### *Italic heading*` → `<h3><em>`, `oblique 12deg` / 700, the
+  font's own slanted face; `### ***Bold italic heading***` → `<em><strong>`, `oblique 12deg`,
+  `<strong>` computes 900, clamped to the font's 700 — looks identical to the italic-only one;
+  `### Upright heading` upright. `font-synthesis: none`.
+- Unchanged: "Currently on view" `oblique 12deg`; header pills `oblique 12deg` on phone, `normal`
+  on desktop; artist title upright bold; italics in body text `oblique 12deg`.
+- Console: only the 404 for Sabrina's deleted second image (Status 4), no script errors.
+
 ### Verified — empty-lines fix (headless Chromium, 1512×982 and 390×844)
 
 - Home `#current`, "About BOOM!": "…chosen craft." / blank line / "We seek…promoted." / blank
@@ -186,29 +208,36 @@ Kask (November 20th), Maria Pita Guerreiro (November 27th), Joanne Grüne Yanoff
 
 ## What Caspar must do (browser only)
 
-1. If this fix arrived as a PR (not straight on `main`): GitHub → Pull requests → open it →
-   Merge. Then Actions → the new "Deploy to GitHub Pages" run → check it is green.
-2. Check https://thespacecraft.se → scroll to Boom! Glass Group → "About BOOM!" and "Om BOOM!"
+1. Actions → the newest "Deploy to GitHub Pages" runs (after `110b57b` and the heading fix) →
+   check they are green.
+2. **Italic sub-headings** (they are now upright unless the editor marks them): `/admin` →
+   **Sabrina Gschwandtner** → **Text** → select the heading text "About the works:" → italic
+   button; the same for "About the artist:" and any other heading that should be italic (e.g.
+   Boom! Glass Group's "LIFE ON VENUS – Celestial Body", "About BOOM!", "Om BOOM!" if wanted) →
+   Save. Then reopen the entry in the editor and check the heading is still italic (Tina keeps it
+   as `### *…*`); on the site it shows slanted after the deploy.
+3. Check https://thespacecraft.se → scroll to Boom! Glass Group → "About BOOM!" and "Om BOOM!"
    look like the intended layout; https://thespacecraft.se/artists/sabrina-gschwandtner has a
    gap between the two works.
-3. **Sabrina's second image is missing:** `/admin` → Sabrina Gschwandtner → **Second image** →
+4. **Sabrina's second image is missing:** `/admin` → Sabrina Gschwandtner → **Second image** →
    upload/choose the Joshua White photo again (it was deleted from Media on 2026-11-09) → Save.
    Or clear the field if it should go.
-4. In Sabrina's **Text**, the last line ("Image features … Photo by Joshua White Photography.")
+5. In Sabrina's **Text**, the last line ("Image features … Photo by Joshua White Photography.")
    repeats the caption — delete it if it shouldn't be shown twice. **Links:** delete the empty
    item (trash icon) or fill it in.
-5. Ongoing: to make a gap in a text, leave one empty line (two for a bigger gap); a new paragraph
+6. Ongoing: to make a gap in a text, leave one empty line (two for a bigger gap); a new paragraph
    without an empty line starts directly on the next line. When an exhibition ends: its
    **Status** → *Previous*, the next → *Current* (one *Current*; lowest **Sort order** wins). Put
    a sub-heading after the intro of each text: that's where the main image goes.
 
 ## In progress
 
-- Nothing beyond this fix (Status 2).
+- Nothing. Waiting on Caspar's `/admin` edits (italic headings, Sabrina's image).
 
 ## Next steps
 
-1. Merge/deploy this fix (if it is a PR), restore Sabrina's second image.
+1. Check today's deploys, italicise the sub-headings that should be italic, restore Sabrina's
+   second image.
 2. Unpin `@tinacms/cli` / remove the `@tinacms/graphql` override, regenerate
    `tina/tina-lock.json`, verify CI's Tina step (own session, on a green `main`).
 3. Later: first light visual as a client-only island in `src/components/visual/`.
@@ -280,6 +309,7 @@ No forwarding rules. Untouched: `_dmarc` TXT, `_domainconnect` CNAME.
 
 - Production: https://thespacecraft.se (admin: https://thespacecraft.se/admin/)
 - https://bromsc.github.io/spacecraft-site/ → redirects to the domain.
-- `main` before this fix: `c55c1b1` (PR #4 merge, 2026-11-10). PR #3 merge `84ab069`
-  (2026-11-02), PR #2 `4c869a2` (2026-10-30). Deploy runs were not checked this session.
+- `main`: `c55c1b1` (PR #4 merge, 2026-11-10) → `110b57b` (empty lines) → the heading fix. PR #3
+  merge `84ab069` (2026-11-02), PR #2 `4c869a2` (2026-10-30). Deploy runs were not checked this
+  session.
 - Deploy runs: https://github.com/BromsC/spacecraft-site/actions

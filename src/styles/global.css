@@ -144,13 +144,14 @@ p {
   margin: 0;
 }
 
-/* Sub-headings in the text ("About the works:"). Every level looks the same. In the artist block
+/* Sub-headings in the text ("About the works:"). Every level looks the same: bold and upright, as
+   in the editor; italic only where the editor sets it (`<em>`, see above). In the artist block
    the first sub-heading also marks where the main image goes (see .feature__body). */
 .prose :is(h1, h2, h3, h4, h5, h6) {
   margin: 1em 0 0.3em;
   font-size: var(--fs-subheading);
   font-weight: 700;
-  font-style: oblique 12deg;
+  font-style: normal;
   line-height: normal;
 }
 

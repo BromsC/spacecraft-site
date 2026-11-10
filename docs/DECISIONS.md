@@ -469,3 +469,25 @@ Format: date · decision · why · alternatives rejected.
   match a whitespace-only `<p> </p>` or remove a literal `\`; `@astrojs/markdown-remark` +
   a remark plugin (Astro 7 no longer uses remark by default: a second Markdown engine for one
   step); string-replacing the rendered HTML (fragile).
+
+## 2026-11-10 — Sub-headings upright; italic only where the editor sets it (supersedes the heading style of "One text field per artist, floats for the 'clean cut'", 2026-10-30)
+
+- **Decision:** Sub-headings in artist texts (`.prose h1`–`h6`, every level styled the same as
+  decided on 2026-10-30) are bold and **upright** (`font-style: normal`); size
+  (`--fs-subheading`) and margins unchanged. Until now they were forced to `oblique 12deg`. A
+  heading is italic only when the editor marks it (select the heading text in `/admin` → italic
+  button), which Tina saves as `### *About the works:*` → `<h3><em>…</em></h3>`; the existing
+  `.prose em, .prose i { font-style: oblique 12deg }` rule (2026-11-02) slants it with the font's
+  own oblique face. Content files were not changed; Caspar re-italicises headings in `/admin`.
+- **Why:** The Tina editor shows headings upright, so editors saw one thing and the site showed
+  another. Now what the editor shows is what the site shows.
+- **Checked (headless Chromium, 1512×982 and 390×844):** headings compute `normal` / 700; `<em>`
+  inside a heading computes `oblique 12deg` / 700; `***…***` in a heading (`<em><strong>`) also
+  renders with the real oblique face — `<strong>` computes weight 900 (`bolder` than 700), which
+  the font (400–700) clamps to 700, so it looks exactly like an italic-only heading; with
+  `font-synthesis: none` nothing is faked. Unchanged: "Currently on view" (`oblique 12deg`, own
+  rule), the phone header (`oblique 12deg`, own rule; desktop header `normal`), artist title,
+  italics in body text.
+- **Rejected:** Keeping the forced oblique (editor/site mismatch); slanting headings in the Tina
+  editor instead (the admin's styling is Tina's, not ours); a separate "italic heading" field
+  (the italic button already expresses it).
