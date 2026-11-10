@@ -1,0 +1,119 @@
+/*
+  Editor styling for /admin: makes the rich-text editing area look like the site, so that what a
+  curator sees is what the site shows. Added to public/admin/index.html after `tinacms build` by
+  scripts/inject-admin-css.mjs. Tina has no option for this; if a Tina update changes the editor's
+  markup, these rules simply stop matching and the editor falls back to Tina's own look.
+
+  Only the editing area is touched. Hooks, all Slate/Plate's own (not Tailwind utilities):
+    [data-slate-editor]            the editable area of a rich-text field
+    .slate-p                       a paragraph (Enter)
+    br                             a line break (Shift+Enter)
+    h3 / ul / li / a / strong / em sub-heading, bullet list, link, bold, italic
+  The doubled attribute selector only raises specificity above Tina's utility classes.
+  `__BASE__` is replaced with the site's base path by the inject script.
+
+  Keep in step with the `.prose` rules in src/styles/global.css.
+*/
+
+/* The site font: same file and @font-face as the site (ABC Areal, wght 400–700, real slant). */
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('__BASE__/fonts/ABCArealSuperfamilyVariable.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABC Areal';
+  src: url('__BASE__/fonts/ABCArealSuperfamilyVariable.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: oblique 12deg;
+  font-display: swap;
+}
+
+[data-slate-editor][data-slate-node='value'] {
+  box-sizing: border-box;
+  max-width: 742px; /* the site's 710 px text column + 16 px padding on each side */
+  padding: 12px 16px;
+  font-family: 'ABC Areal', Helvetica, Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: normal;
+  font-synthesis: none; /* never fake bold or italic, as on the site */
+  color: #000;
+}
+
+/* Enter = new paragraph = exactly one blank line above it. Shift+Enter = <br>, no gap. */
+[data-slate-editor][data-slate-node='value'] :is(.slate-p, ul, ol, li) {
+  margin: 0;
+  padding-block: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+[data-slate-editor][data-slate-node='value'] > :is(.slate-p, ul, ol) + :is(.slate-p, ul, ol) {
+  margin-top: 1.0833em;
+  margin-top: 1lh;
+}
+
+/* Sub-heading: bold, upright, larger (the site's 32 px against 24 px body text). */
+[data-slate-editor][data-slate-node='value'] > :is(h1, h2, h3, h4, h5, h6) {
+  margin: 1em 0 0.3em;
+  padding: 0;
+  font-family: inherit;
+  font-size: 1.3333em;
+  font-weight: 700;
+  font-style: normal;
+  line-height: normal;
+  color: inherit;
+}
+
+[data-slate-editor][data-slate-node='value'] > :first-child {
+  margin-top: 0;
+}
+
+/* Bold, italic (the font's own slant, also inside sub-headings), links. */
+[data-slate-editor][data-slate-node='value'] :is(strong, b) {
+  font-weight: 700;
+}
+
+[data-slate-editor][data-slate-node='value'] :is(em, i) {
+  font-style: oblique 12deg;
+}
+
+[data-slate-editor][data-slate-node='value'] a {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: auto;
+  text-underline-offset: 0.15em;
+}
+
+/* Bullet list: real bullets, hanging indent, no gap between items. */
+[data-slate-editor][data-slate-node='value'] :is(ul, ol) {
+  padding-left: 1.2em;
+}
+
+[data-slate-editor][data-slate-node='value'] ul {
+  list-style: disc;
+}
+
+[data-slate-editor][data-slate-node='value'] li::marker {
+  color: currentColor;
+}
+
+/* Tina does not save an empty paragraph (Enter twice): the site would show one blank line, not
+   two. Say so in the editor, except on the last line, where the next paragraph is usually being
+   typed. */
+[data-slate-editor][data-slate-node='value'] > .slate-p:not(:last-child):has([data-slate-zero-width='n']):not(:has([data-slate-string]))::after {
+  content: 'empty paragraph: not saved';
+  position: absolute; /* .slate-p is position: relative; the hint must not add height */
+  top: 0;
+  left: 0.5em;
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 22px;
+  pointer-events: none;
+  user-select: none;
+}

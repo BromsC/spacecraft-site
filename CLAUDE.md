@@ -67,8 +67,14 @@ src/
   components/visual/     # client-only visual islands (Three.js etc. later)
   pages/                 # routes: index, artists/index, artists/[slug], 404
   styles/global.css      # design tokens (:root) + global styles
+scripts/
+  text-test.mjs          # `npm run test:text`: Tina round trip + site rendering of the text rule
+  inject-admin-css.mjs   # adds tina/admin.css to the built admin page (CI, fail-safe)
+  content-report.mjs     # CI job summary: constructs outside the editor's tool set
 tina/
   config.ts              # Tina schema — must mirror src/content.config.ts
+  rich-text.ts           # the artist rich-text fields (toolbar, descriptions), shared with the test
+  admin.css              # editor styling for /admin — keep in step with `.prose` in global.css
   tina-lock.json         # generated schema lock — COMMIT it (Tina Cloud reads it)
   __generated__/         # gitignored
 docs/
@@ -83,6 +89,9 @@ docs/
 - Scripts: `npm run build:site` (Astro only, no Tina — what to use to verify), `npm run build`
   (Tina + Astro, needs Tina secrets), `npm run dev`, `npx astro check`.
 - Keep `npm run build:site` and `npx astro check` at zero errors and zero warnings.
+- Text rule (editor and site): Enter = paragraph = one blank line, Shift+Enter = line break.
+  After touching `.prose` CSS, `src/lib/blank-lines.ts`, `tina/rich-text.ts` or Tina versions,
+  run `npm run test:text`.
 - Content entry ids come from filenames. Don't add a `slug` frontmatter field — Astro's glob
   loader would use it as the id and it would drift from the filename Tina manages.
 

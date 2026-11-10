@@ -13,8 +13,9 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'ignore',
   markdown: {
-    // Sätteri is Astro's default Markdown processor; this only adds one step to it: empty lines
-    // from the editor (lone `\` lines) → one blank line each. See src/lib/blank-lines.ts.
+    // Sätteri is Astro's default Markdown processor; this only adds one step to it, the safety
+    // net for editor texts (empty paragraphs, stray `\`, paste leftovers). The same step renders
+    // the image caption (src/lib/content.ts). See src/lib/blank-lines.ts.
     processor: satteri({ mdastPlugins: [blankLines] }),
   },
 });

@@ -1,5 +1,6 @@
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
-import { Marked } from 'marked';
+import { createSatteriMarkdownProcessor } from '@astrojs/markdown-satteri';
+import { captionOptions } from './blank-lines';
 
 // Small data helpers so pages don't repeat collection plumbing.
 
@@ -45,17 +46,16 @@ export function withPeriod(text: string) {
   return /[.!?]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`;
 }
 
-// Markdown caption (Tina rich-text stored in frontmatter, e.g. `btsCaption`) → HTML.
-// Inline formatting only (bold, italic, links, line breaks): each blank-line-separated block is
-// rendered with parseInline and wrapped in <p>, so headings/lists typed by hand stay plain text.
+// Markdown caption (Tina rich-text stored in frontmatter, e.g. `btsCaption`) → HTML, through the
+// same Markdown processor (Sätteri) and the same step (`blankLines`) as the artist text, so
+// paragraphs and line breaks follow one rule; the output is paragraphs with inline formatting
+// only (`captionOptions`).
 // Returns undefined for a missing or blank value (Tina may write an empty string).
-const captionMarked = new Marked({ gfm: true });
+let captionRenderer: ReturnType<typeof createSatteriMarkdownProcessor> | undefined;
 
-export function renderCaption(markdown?: string) {
-  const text = markdown?.trim();
-  if (!text) return undefined;
-  return text
-    .split(/\n\s*\n/)
-    .map((block) => `<p>${captionMarked.parseInline(block.trim(), { async: false })}</p>`)
-    .join('');
+export async function renderCaption(markdown?: string) {
+  if (!markdown?.trim()) return undefined;
+  captionRenderer ??= createSatteriMarkdownProcessor(captionOptions);
+  const { code } = await (await captionRenderer).render(markdown);
+  return code.trim() || undefined;
 }

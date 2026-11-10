@@ -13,13 +13,13 @@
     "build:site": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test:text": "node scripts/text-test.mjs",
     "astro": "astro",
     "tinacms": "tinacms"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "0.4.4",
     "astro": "^7.4.1",
-    "marked": "^18.1.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tinacms": "^3.15.0"
