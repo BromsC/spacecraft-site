@@ -155,6 +155,18 @@ p {
   margin-top: 1lh;
 }
 
+/* Smoother line breaks where the browser can (progressive enhancement, nothing breaks without
+   it): no short last lines in paragraphs, even lines in sub-headings and the artist title.
+   No hyphenation: the texts mix Swedish and English. */
+.prose p {
+  text-wrap: pretty;
+}
+
+.prose :is(h1, h2, h3, h4, h5, h6),
+.feature__title {
+  text-wrap: balance;
+}
+
 /* Bullet lists: body size, real bullets hanging in the margin of the text, no gap between
    items. */
 .prose :is(ul, ol) {
