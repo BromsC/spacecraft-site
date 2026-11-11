@@ -4,6 +4,7 @@ status: upcoming
 period: November 20th
 order: 4
 imageSide: left
+mainImage: /uploads/HeleneKask.png
 btsCaption: ''
 ---
 
