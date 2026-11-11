@@ -9,7 +9,7 @@ btsCaption: ''
 
 ### SUN THERAPY
 
-Opening Friday, 27 November, 4:00-6:00 PM.
+Opening event on Friday, 27 November, 4:00-6:00 PM.
 
 ***SUN THERAPY*** explores the relationship between light, the human body, and seasonal changes. During winter, reduced daylight can disrupt our circadian rhythm, affect sleep and mood, and contribute to seasonal affective disorder (SAD), commonly known as winter depression.
 
