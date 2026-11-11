@@ -14,7 +14,7 @@ btsCaption: |
 
 Trained as a software engineer, Roni Kaufman started exploring embroidery in 2021, seeking a new way to bring his screen bound works into the physical world. By hand-embroidering code-generated patterns, Kaufman transforms mathematical abstraction into a tactile reality, where the precision of the machine meets the organic cadence of the human hand.
 
-During the festival, Kaufman presents two digital animations and a collection of his embroideries which are exhibited so visitors can see both sides of the textiles. The polished front reflects the clean output you’d see on a screen, while the exposed back echoes the algorithmic process. Together, the two faces expose the hidden choreography behind every digitally generated image and celebrate the enduring dialogue between textile craft and the history of computing.
+During the festival, Kaufman presents two digital animations and a collection of his embroideries which are displayed so visitors can see both sides of the textiles. The polished front reflects the clean output you’d see on a screen, while the exposed back echoes the algorithmic process. Together, the two faces expose the hidden choreography behind every digitally generated image and celebrate the enduring dialogue between textile craft and the history of computing.
 
 ### About the Artist
 
