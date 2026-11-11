@@ -4,6 +4,7 @@ status: upcoming
 period: November 27th
 order: 5
 imageSide: left
+mainImage: /uploads/MariaP.png
 btsCaption: ''
 ---
 
