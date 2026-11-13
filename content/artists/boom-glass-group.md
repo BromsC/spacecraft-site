@@ -1,6 +1,6 @@
 ---
 name: Boom! Glass Group
-status: current
+status: previous
 period: 6 – 13 November
 order: 2
 imageSide: left
