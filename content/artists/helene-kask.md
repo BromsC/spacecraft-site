@@ -10,6 +10,9 @@ btsCaption: ''
 
 ### Talismanic Bodies
 
+Opening event on Friday, 20 November.\
+4:00-5:00 PM.
+
 *Talismanic Bodies* explores futuristic scenarios and the protective qualities our bodies might need for survival. Grounded in two theoretical and conceptual frameworks: Speculative Craft and The Hybrid Laboratory, the work draws inspiration from speculative thinking and science, as well as posthuman and more-than-human philosophies. From this foundation, different conceptual ideas are introduced, posing “what-if” questions that function as catalysts for the expansion of thought, encouraging the dream of the impossible becoming possible.
 
 What if our bodies could code organisms in the future that would protect us from dangerous bacteria and viruses? What if our bodies could feed themselves in the future through an internal system if we run out of food and water?
