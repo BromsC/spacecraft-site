@@ -6,7 +6,8 @@ order: 4
 imageSide: left
 mainImage: /uploads/HeleneKask.png
 btsImage: /uploads/Helene-Kask-glass-web.jpg
-btsCaption: ''
+btsCaption: |
+  Helene Kask, “Talismanic Bodies”. Glass objects made by Luke Holden.
 ---
 
 ### Talismanic Bodies
