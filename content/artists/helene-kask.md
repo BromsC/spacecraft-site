@@ -5,6 +5,7 @@ period: November 20th
 order: 4
 imageSide: left
 mainImage: /uploads/HeleneKask.png
+btsImage: /uploads/Helene-Kask-glass-web.jpg
 btsCaption: ''
 ---
 
