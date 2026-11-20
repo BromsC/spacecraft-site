@@ -5,6 +5,7 @@ period: November 27th
 order: 5
 imageSide: left
 mainImage: /uploads/MariaP.png
+btsImage: /uploads/IMG_1912.jpeg
 btsCaption: ''
 ---
 
