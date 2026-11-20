@@ -1,6 +1,6 @@
 ---
 name: Helene Kask
-status: upcoming
+status: current
 period: November 20th
 order: 4
 imageSide: left
