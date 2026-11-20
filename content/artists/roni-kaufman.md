@@ -1,6 +1,6 @@
 ---
 name: Roni Kaufman
-status: current
+status: previous
 period: November 13th
 order: 3
 imageSide: left
