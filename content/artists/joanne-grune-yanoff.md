@@ -5,6 +5,7 @@ period: December 4th
 order: 6
 imageSide: left
 mainImage: /uploads/JoanneG.png
+btsImage: /uploads/Cassandra's-FlightBox-web.jpg
 btsCaption: ''
 ---
 
