@@ -1,7 +1,7 @@
 ---
 name: Roni Kaufman
 status: previous
-period: 13 – 20 November
+period: 13 November
 order: 3
 imageSide: left
 mainImage: /uploads/Roni-1.png
@@ -11,6 +11,8 @@ btsCaption: |
 ---
 
 ### Algorithms, Back and Forth
+
+13 – 20 November
 
 Trained as a software engineer, Roni Kaufman started exploring embroidery in 2021, seeking a new way to bring his screen bound works into the physical world. By hand-embroidering code-generated patterns, Kaufman transforms mathematical abstraction into a tactile reality, where the precision of the machine meets the organic cadence of the human hand.
 
