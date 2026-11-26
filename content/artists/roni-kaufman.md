@@ -1,7 +1,7 @@
 ---
 name: Roni Kaufman
 status: previous
-period: 13 November
+period: 13 – 20 November
 order: 3
 imageSide: left
 mainImage: /uploads/Roni-1.png
