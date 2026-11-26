@@ -1,7 +1,7 @@
 ---
 name: Joanne Grüne Yanoff
 status: upcoming
-period: 4 December
+period: 4  – 11 December
 order: 6
 imageSide: left
 mainImage: /uploads/JoanneG.png
