@@ -1,7 +1,7 @@
 ---
 name: Maria Pita Guerreiro
 status: upcoming
-period: 27 November
+period: 27 November – 4 December
 order: 5
 imageSide: left
 mainImage: /uploads/MariaP.png
