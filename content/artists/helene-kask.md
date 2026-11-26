@@ -1,7 +1,7 @@
 ---
 name: Helene Kask
 status: current
-period: November 20th
+period: 20 November
 order: 4
 imageSide: left
 mainImage: /uploads/HeleneKask.png
