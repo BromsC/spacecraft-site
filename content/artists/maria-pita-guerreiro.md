@@ -5,13 +5,14 @@ period: November 27th
 order: 5
 imageSide: left
 mainImage: /uploads/MariaP.png
-btsImage: /uploads/IMG_1912.jpeg
-btsCaption: ''
+btsImage: /uploads/SUN-LAMP2.png
+btsCaption: |
+  Maria Pita Guerreiro, “Sun Therapy”.
 ---
 
 ### SUN THERAPY
 
-Welcome to the opening on Friday, 27 November, 4:00-6:00 PM. Vitamine D will be served!
+Welcome to the opening on Friday, 27 November, 4:00-6:00 PM. Vitamin D will be served!
 
 ***SUN THERAPY*** explores the relationship between light, the human body, and seasonal changes. During winter, reduced daylight can disrupt our circadian rhythm, affect sleep and mood, and contribute to seasonal affective disorder (SAD), commonly known as winter depression.
 
