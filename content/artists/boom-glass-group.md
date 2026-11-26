@@ -1,7 +1,7 @@
 ---
 name: Boom! Glass Group
 status: previous
-period: 6 - 13 November
+period: 6 – 13 November
 order: 2
 imageSide: left
 mainImage: /uploads/BoomGlass.png
