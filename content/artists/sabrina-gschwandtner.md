@@ -1,7 +1,7 @@
 ---
 name: Sabrina Gschwandtner
 status: previous
-period: 30 October  – 6 November
+period: 30 October
 order: 1
 imageSide: left
 mainImage: /uploads/2160Sabrina.png
@@ -12,9 +12,9 @@ links:
   - {}
 ---
 
-Sabrina Gschwandtner (USA) is a visual artist and filmmaker. Two works by the artist are presented for the festival titled, “Hands at Work Video” (2017) and “Hand-painted Serpentine Dance" (2021). In the videos, archival footage is shaped, repeated and merged with colorful patterns creating a visual montage reminiscent of quilts. Narratives of feminism and promoting women’s contributions to culture are themes the artist explores in her works.
+30 October  – 6 November
 
-### About the works:
+Sabrina Gschwandtner (USA) is a visual artist and filmmaker. Two works by the artist are presented for the festival titled, “Hands at Work Video” (2017) and “Hand-painted Serpentine Dance" (2021). In the videos, archival footage is shaped, repeated and merged with colorful patterns creating a visual montage reminiscent of quilts. Narratives of feminism and promoting women’s contributions to culture are themes the artist explores in her works.
 
 **“Hand-painted Serpentine Dance”, 2021.** \
 4k video, color, silent, 1:12 mins (loops).
