@@ -1,7 +1,7 @@
 ---
 name: Sabrina Gschwandtner
 status: previous
-period: 30 October – 6 November
+period: 30 October
 order: 1
 imageSide: left
 mainImage: /uploads/2160Sabrina.png
