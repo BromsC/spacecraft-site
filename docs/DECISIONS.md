@@ -722,3 +722,20 @@ Format: date · decision · why · alternatives rejected.
   to Tina's default list (audio refused), nothing else breaks.
 - **`tina/tina-lock.json`** regenerated: the only change is the new field.
 - **Not verified:** an audio upload in the live Tina Cloud admin (needs a login).
+
+## 2026-11-27 — Sound toggle: blue text, bigger on phones
+
+- **Decision:** the "Sound on / Sound off" text uses `--color-accent` (#0000ff) on every
+  viewport, on the unchanged white `.pill`; the focus outline (`currentColor`) is blue as well.
+  Header pills unchanged. Phone (< 48rem): font-size 15 px (was `--fs-header`, 12 px), hit area
+  at least 32 × 32 px (`.sound__toggle::before`, centred on the pill: `max(100% + 8px, 32px)` ×
+  `max(100% + 12px, 32px)`), gap to the dates/venue line 10 px (was 6 px), `main` padding-bottom
+  72 px while the toggle shows (was 56 px). Desktop size and place unchanged (`--fs-header`,
+  hit area pill + 6/4 px).
+- **Why:** Caspar's request — the toggle should read as the one interactive control (blue like
+  the arrows) and be easier to tap on a phone.
+- **Verified:** headless Chromium at 1512×982, 390×844, 320×568 (home with the current artist's
+  sound, artist page, artist page scrolled to the end): text rgb(0, 0, 255) on white; phone pill
+  16 px tall, hit area 84 × 32 px, 10 px above the dates/venue line, right-aligned, no overlap;
+  end of page content ("← Home") clear above the toggle; desktop 20 px, hit area 109 × 34 px
+  as before.

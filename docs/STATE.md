@@ -2,10 +2,14 @@
 
 ## Last updated
 
-2026-11-27 — **Artist sound** (Claude Code): optional looping sound per artist (Tina field
-"Sound"), with a "Sound on / Sound off" toggle. Branch `claude/fervent-bardeen-dico7g`, pull request
-[#6](https://github.com/BromsC/spacecraft-site/pull/6) into `main`, **not merged yet**. No artist has a sound yet. Details: DECISIONS 2026-11-27
-(three entries).
+2026-11-27 — **Sound toggle style** (Claude Code): the "Sound on / Sound off" text is blue
+(accent) on its white pill; on phones it is bigger (15 px, at least 32 × 32 px to tap). Branch
+`claude/practical-rubin-1sw9w7`, pull request into `main`. Details: DECISIONS 2026-11-27
+("Sound toggle: blue text, bigger on phones").
+
+Earlier the same day: **Artist sound** (PR [#6](https://github.com/BromsC/spacecraft-site/pull/6),
+merged): optional looping sound per artist (Tina field "Sound"), with the toggle. Details:
+DECISIONS 2026-11-27 (three entries).
 
 Before that: 2026-11-10 editor rework (PR #5, merged): one text rule in `/admin` and on the site.
 
@@ -21,7 +25,7 @@ Before that: 2026-11-10 editor rework (PR #5, merged): one text rule in `/admin`
   "Currently on view" block while that block is on screen (fades out when you scroll away). It
   loops until the visitor leaves or switches it off.
 - **In the browser:** sound starts after the visitor's first click or tap anywhere on the page;
-  iPhones always need a tap. Until then the pill in the bottom-right corner says **"Sound off"**;
+  iPhones always need a tap. Until then the pill in the bottom-right corner (blue text) says **"Sound off"**;
   tapping it turns sound on, tapping again turns it off. "Off" is remembered while the browser
   tab stays open: later pages then stay silent until switched on again. Switching to another tab
   pauses the sound; coming back resumes it. Without a sound in the field there is no pill and
@@ -46,15 +50,17 @@ Before that: 2026-11-10 editor rework (PR #5, merged): one text rule in `/admin`
 ## Status summary
 
 1. **Live:** https://thespacecraft.se. `main` = PR #5 (editor rework, 2026-11-10) plus content
-   commits from `/admin` up to `ee35242` (2026-11-26; deploy run 140 green). The sound feature is
-   on branch `claude/fervent-bardeen-dico7g` until its pull request is merged.
+   commits from `/admin`, plus PR #6 (artist sound, merged 2026-11-27), up to `2d988a2`. The
+   toggle style change is on branch `claude/practical-rubin-1sw9w7` until its pull request is
+   merged.
 2. `npm run build:site`, `npx astro check` (0 errors, 0 warnings, 0 hints), `npm run test:text`
    (all pass) and `npm run test:sound` (all pass) pass.
 3. **The editor in `/admin` is restyled** (site font, 710 px column, same gaps). This was tested
    in Tina's local mode in the sandbox, **not on the live Tina Cloud admin**: see "What Caspar
    must do".
-4. **Content:** Helene Kask *current* (20 – 27 November); Sabrina, Boom! Glass Group, Roni
-   Kaufman *previous*; Maria Pita Guerreiro, Joanne Grüne Yanoff *upcoming*. No sounds.
+4. **Content:** Maria Pita Guerreiro *current* (27 November – 4 December, with a sound:
+   `/uploads/SUN-THERAPY-_SOUNDWORK.mp3`); Sabrina, Boom! Glass Group, Roni Kaufman, Helene Kask
+   *previous*; Joanne Grüne Yanoff *upcoming*.
 5. **Still broken:** Sabrina's second image file
    `/uploads/Photo-Joshua_White-jwpictures.com-9991.jpg` was deleted from the repo by a Tina
    media action (`edeab6d`, 2026-11-09) but her **Second image** field still points to it → 404
@@ -157,8 +163,11 @@ browsers that support it (no single word alone on a last line; evenly broken hea
   on the first click. Autoplay tried; if refused, "Sound off" + the first click/tap/key starts
   it. `sessionStorage` `spacecraft:sound` = `on`/`off`. Pauses on hidden tab, stops on
   `pagehide`. Toggle CSS in `global.css` ("Sound toggle"): fixed pill, bottom right (16 px from
-  the bottom on desktop; on a phone directly above the dates/venue line), `<button
-  aria-pressed>`, accessible name "Sound", hidden without JS.
+  the bottom on desktop; on a phone directly above the dates/venue line, 10 px gap), text in
+  `--color-accent` (blue) on the white `.pill` on every viewport, focus ring blue too. Size:
+  desktop `--fs-header`, hit area pill + 6/4 px; phone 15 px, hit area at least 32 × 32 px
+  (`::before`, centred on the pill). Phone `main` padding-bottom 72 px while the toggle shows.
+  `<button aria-pressed>`, accessible name "Sound", hidden without JS.
 - Loading overlay (`index.astro`): white layer with the logo; after the logo loads (max 2 s) it
   stays 800 ms, fades 500 ms, is removed. Reduced motion → removed at once. JS only.
 - `src/lib/content.ts` — data helpers + async `renderCaption()` (Sätteri via
@@ -233,7 +242,7 @@ Current content: "Out of This World! Exhibition Festival of Contemporary Craft a
 order: Sabrina Gschwandtner (previous, "30 October"), Boom! Glass Group (previous, "6 November"),
 Roni Kaufman (previous, "13 November"), **Helene Kask (current, 20 – 27 November)**, Maria Pita
 Guerreiro (upcoming, 27 November – 4 December), Joanne Grüne Yanoff (upcoming, 4 – 11
-December). No artist has a sound.
+December). (Snapshot from 2026-11-10; current content: Status summary item 4.)
 
 ### Verified — artist sound (2026-11-27)
 
@@ -320,7 +329,8 @@ text is unaffected. Say so in the Project chat, or roll back (above).
 
 ## In progress
 
-- Artist sound: PR [#6](https://github.com/BromsC/spacecraft-site/pull/6) open, waiting for merge and Caspar's live check (above).
+- Sound toggle style (blue, bigger on phones): pull request from `claude/practical-rubin-1sw9w7`,
+  waiting for merge. Artist sound (PR #6) is merged; Caspar's live check still open (above).
 
 ## Next steps
 
