@@ -25,3 +25,5 @@ The project explores light therapy as a way to counteract the effects of sun dep
 Maria Pita Guerreiro is a Portuguese experimental designer and artist based in Stockholm. Her work sits at the intersection of design, art, craft, science, and health, drawing inspiration from natural systems, rituals, the human body, and feminism. She primarily focuses on material research, exploring the tension between disgust and attraction through living materials such as fungi and bacteria.
 
 She has participated in numerous art and design residencies throughout Europe, and her work has been featured internationally at design fairs, museums, and galleries. Her most recent solo show, WINTER BLUES, was exhibited at Konstepidemin in Gothenburg.
+
+https\://mariapitaguerreiro.com
