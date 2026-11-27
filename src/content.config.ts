@@ -52,6 +52,12 @@ const artists = defineCollection({
     mainImage: z.string().optional(),
     btsImage: z.string().optional(),
     btsCaption: z.string().optional(), // Markdown string (Tina rich-text, not isBody)
+    // "Sound" — public path of an mp3/m4a ("/uploads/x.mp3"), looped by ArtistSound.astro.
+    // Tina writes "" when the field is cleared: treated as no sound.
+    sound: z
+      .string()
+      .optional()
+      .transform((value) => value?.trim() || undefined),
     links,
   }),
 });

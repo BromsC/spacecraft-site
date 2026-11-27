@@ -1,4 +1,4 @@
-import { defineConfig, type Template } from 'tinacms';
+import { DEFAULT_MEDIA_UPLOAD_TYPES, defineConfig, type Template } from 'tinacms';
 import { bodyField, captionField } from './rich-text';
 
 // Slugify helper used for artist filenames.
@@ -10,6 +10,20 @@ const slugify = (value?: string) =>
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+
+// Uploads allowed in /admin: Tina's default list (images, video, PDFs, …; no audio at all) plus
+// mp3 (`audio/mpeg`; some Windows browsers say `audio/mp3`) and m4a (`audio/mp4`, `audio/x-m4a`,
+// `audio/m4a`) for the artist "Sound" field. Not the field-level `accept`: its vocabulary has
+// mp3 but no m4a. See DECISIONS 2026-11-27.
+const UPLOAD_TYPES = [
+  ...DEFAULT_MEDIA_UPLOAD_TYPES.split(','),
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/mp4',
+  'audio/x-m4a',
+  'audio/m4a',
+];
+const SOUND_EXTENSIONS = /\.(mp3|m4a)$/i;
 
 const linkFields: Template['fields'] = [
   { type: 'string', name: 'label', label: 'Label', required: true },
@@ -33,6 +47,21 @@ export default defineConfig({
       publicFolder: 'public',
       mediaRoot: 'uploads',
     },
+    // The documented setting. Tina 3.15 drops it when it writes the schema (its config check
+    // keeps only `media.tina`), so the admin never sees it: cmsCallback below applies the same
+    // list. Kept so it takes over once Tina passes it through.
+    accept: UPLOAD_TYPES,
+  },
+
+  // Both upload paths in the admin (the media manager and dropping a file on a field) fall back to
+  // `cms.media.accept`, which Tina hard-wires to its default list. Override it on the instance.
+  cmsCallback: (cms) => {
+    try {
+      Object.defineProperty(cms.media, 'accept', { configurable: true, get: () => UPLOAD_TYPES.join(',') });
+    } catch {
+      // Tina changed its internals: uploads fall back to Tina's default list (no audio).
+    }
+    return cms;
   },
 
   // Keep in sync with src/content.config.ts (Astro reads the same files).
@@ -164,6 +193,19 @@ export default defineConfig({
             description: 'Shown below the whole text, at full column width.',
           },
           captionField,
+          {
+            // An "image" field is Tina's only media-manager field; it stores the file's public path
+            // (/uploads/x.mp3) like the image fields. Played by src/components/visual/ArtistSound.astro.
+            type: 'image',
+            name: 'sound',
+            label: 'Sound (loops while the page is open)',
+            description:
+              'Optional. Keep the file small (about 1–3 MB), mp3 or m4a. It starts after the visitor\'s first click or tap (iPhones always need a tap); visitors can switch it off. Leave empty for no sound.',
+            ui: {
+              validate: (value?: string) =>
+                value && !SOUND_EXTENSIONS.test(value) ? 'Choose an mp3 or m4a file.' : undefined,
+            },
+          },
           {
             type: 'object',
             name: 'links',

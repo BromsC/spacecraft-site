@@ -72,6 +72,12 @@ jobs:
         continue-on-error: true
         run: npm run test:text
 
+      # Report only: the sound toggle appears exactly where an artist has a "Sound" (and the
+      # file is there, mp3/m4a, ≤ 3 MB). Needs the built site, so it runs after the build.
+      - name: Sound check (report only)
+        continue-on-error: true
+        run: npm run test:sound
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:

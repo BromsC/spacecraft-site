@@ -1,0 +1,475 @@
+---
+import { url } from '../../lib/url';
+
+// Optional looping sound for an artist (Tina field "Sound", `artists.sound`).
+// Render it only when the artist has a sound: `{artist.data.sound && <ArtistSound … />}`, so a
+// page without one gets no markup and no script (checked by scripts/sound-check.mjs).
+//
+// - Playback: Web Audio (fetch → decodeAudioData → looping AudioBufferSourceNode → GainNode, 300 ms
+//   fades), gapless. Fallback: <audio loop> where Web Audio is missing or can't decode the file.
+// - Lazy: nothing is fetched until the page is idle (whole-page sound) or the `scope` element is
+//   starts to scroll into view (or on the first click), never while the visitor has switched it off.
+// - Autoplay: tried when the sound should start; if the browser blocks it (no click or tap yet),
+//   the toggle shows "Sound off" and the visitor's first click, tap or key press starts it.
+// - The toggle is a fixed pill like the header's; hidden without JS (no broken control).
+// - The visitor's choice is kept for the browser tab (sessionStorage). Off = never auto-start.
+// - Not tied to prefers-reduced-motion (sound isn't motion).
+interface Props {
+  // Public path of the audio file, e.g. "/uploads/hum.mp3".
+  src: string;
+  // id of the element that must be in view for the sound to play (home page: "current").
+  // Without it the sound belongs to the whole page.
+  scope?: string;
+}
+
+const { src, scope } = Astro.props;
+---
+
+{
+  src && (
+    <div class="sound" data-artist-sound data-src={url(src)} data-scope={scope} hidden>
+      <button type="button" class="sound__toggle" aria-pressed="false">
+        <span class="pill">
+          Sound<span class="sound__state" aria-hidden="true"> off</span>
+        </span>
+      </button>
+    </div>
+  )
+}
+
+<script>
+  const KEY = 'spacecraft:sound'; // sessionStorage: "on" | "off"
+  const FADE = 0.3; // seconds
+  const RESUME_WAIT = 400; // ms to wait for AudioContext.resume() before calling it blocked
+  // Keys that don't count as "the visitor did something" (moving focus must not start a sound).
+  const IGNORED_KEYS = new Set(['Tab', 'Shift', 'Control', 'Alt', 'Meta', 'Escape', 'CapsLock']);
+  const GESTURES = ['pointerdown', 'pointerup', 'keydown'] as const;
+
+  type Pref = 'on' | 'off' | null;
+
+  const readPref = (): Pref => {
+    try {
+      const value = sessionStorage.getItem(KEY);
+      return value === 'on' || value === 'off' ? value : null;
+    } catch {
+      return null;
+    }
+  };
+  const writePref = (value: 'on' | 'off') => {
+    try {
+      sessionStorage.setItem(KEY, value);
+    } catch {
+      // Storage blocked (private mode, settings): the choice lasts for this page only.
+    }
+  };
+  const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+  // Firefox (and others, in time) can say up front whether sound may start without a gesture,
+  // which avoids creating an AudioContext only for the browser to refuse it.
+  const autoplayAllowed = (kind: 'audiocontext' | 'mediaelement') => {
+    try {
+      const nav = navigator as Navigator & { getAutoplayPolicy?: (kind: string) => string };
+      return (nav.getAutoplayPolicy?.(kind) ?? 'allowed') === 'allowed';
+    } catch {
+      return true;
+    }
+  };
+  const idle = (run: () => void) =>
+    'requestIdleCallback' in window ? requestIdleCallback(run, { timeout: 3000 }) : setTimeout(run, 1000);
+
+  // Loop points without the near-silent padding many encoders add at the start and end (at most
+  // 100 ms each), so the loop has no audible gap.
+  const loopBounds = (buffer: AudioBuffer): [number, number] => {
+    const channels = Array.from({ length: buffer.numberOfChannels }, (_, i) => buffer.getChannelData(i));
+    const silent = (i: number) => channels.every((data) => Math.abs(data[i] ?? 0) < 1e-4);
+    const max = Math.min(Math.floor(buffer.sampleRate * 0.1), Math.floor(buffer.length / 4));
+    let start = 0;
+    while (start < max && silent(start)) start++;
+    let end = buffer.length;
+    while (buffer.length - end < max && end > start + 1 && silent(end - 1)) end--;
+    return [start / buffer.sampleRate, end / buffer.sampleRate];
+  };
+
+  function setup(root: HTMLElement) {
+    const src = root.dataset.src;
+    const button = root.querySelector<HTMLButtonElement>('.sound__toggle');
+    const label = root.querySelector<HTMLElement>('.sound__state');
+    const scopeEl = root.dataset.scope ? document.getElementById(root.dataset.scope) : null;
+    if (!src || !button || !label || (root.dataset.scope && !scopeEl)) return;
+
+    const AudioCtx: typeof AudioContext | undefined =
+      window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    let useElement = !AudioCtx; // <audio loop> fallback
+
+    // What the visitor wants (off = they switched it off in this tab) and what the page allows.
+    let wanted = readPref() !== 'off';
+    let inView = !scopeEl;
+    let hidden = document.visibilityState === 'hidden';
+    let unlocked = false; // the browser lets this page make sound
+    let failed = false;
+    let playing = false;
+    let armed = false;
+
+    // Web Audio
+    let ctx: AudioContext | null = null;
+    let gain: GainNode | null = null;
+    let source: AudioBufferSourceNode | null = null;
+    let fileData: Promise<ArrayBuffer> | null = null;
+    let decoded: Promise<AudioBuffer> | null = null;
+    let buffer: AudioBuffer | null = null; // kept across a teardown (not tied to a context)
+    // <audio> fallback
+    let audio: HTMLAudioElement | null = null;
+    let fadeTimer: ReturnType<typeof setInterval> | undefined;
+
+    const render = () => {
+      const on = wanted && unlocked && !failed;
+      button.setAttribute('aria-pressed', String(on));
+      label.textContent = on ? ' on' : ' off';
+    };
+
+    const fail = (reason: unknown) => {
+      failed = true;
+      playing = false;
+      disarm();
+      teardown();
+      root.hidden = true; // no sound on the page any more, so no toggle
+      console.warn('Sound could not be played:', src, reason);
+    };
+
+    // --- loading -------------------------------------------------------------------------------
+    const preload = () => {
+      if (!wanted || failed) return;
+      if (useElement) {
+        element();
+        return;
+      }
+      if (buffer) return;
+      fileData ??= fetch(src).then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.arrayBuffer();
+      });
+      fileData.catch(() => {}); // handled where it's awaited
+    };
+
+    const context = () => {
+      if (!ctx && AudioCtx) {
+        ctx = new AudioCtx();
+        gain = ctx.createGain();
+        gain.gain.value = 0;
+        gain.connect(ctx.destination);
+      }
+      return ctx;
+    };
+
+    const element = () => {
+      if (!audio) {
+        audio = new Audio();
+        audio.loop = true;
+        audio.preload = 'auto';
+        audio.volume = 0;
+        audio.addEventListener('error', () => fail(audio?.error ?? 'media error'));
+        audio.src = src;
+      }
+      return audio;
+    };
+
+    // --- fades ---------------------------------------------------------------------------------
+    const fadeGain = (to: number) => {
+      if (!ctx || !gain) return;
+      const now = ctx.currentTime;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(to, now + FADE);
+    };
+
+    const fadeVolume = (el: HTMLAudioElement, to: number, done?: () => void) => {
+      clearInterval(fadeTimer);
+      const from = el.volume;
+      const started = performance.now();
+      fadeTimer = setInterval(() => {
+        const t = Math.min(1, (performance.now() - started) / (FADE * 1000));
+        el.volume = from + (to - from) * t;
+        if (t === 1) {
+          clearInterval(fadeTimer);
+          done?.();
+        }
+      }, 25);
+    };
+
+    // --- start / stop --------------------------------------------------------------------------
+    const blocked = () => {
+      unlocked = false;
+      playing = false;
+      arm();
+    };
+
+    const startWebAudio = async (): Promise<void> => {
+      if (!ctx && !autoplayAllowed('audiocontext')) return blocked();
+      const c = context();
+      if (!c) return;
+      if (c.state !== 'running') {
+        await Promise.race([c.resume().catch(() => {}), wait(RESUME_WAIT)]);
+      }
+      // `state` can be "interrupted" on iOS, hence not just "suspended".
+      if ((c.state as string) !== 'running') return blocked();
+      unlocked = true;
+      disarm();
+      if (!source) {
+        try {
+          if (!buffer) {
+            preload();
+            if (!fileData) return;
+            decoded ??= fileData.then((data) => c.decodeAudioData(data));
+            buffer = await decoded;
+          }
+        } catch (error) {
+          // Can't fetch or decode: try the <audio> element once before giving up.
+          if (error instanceof Error && /^HTTP /.test(error.message)) return fail(error);
+          useElement = true;
+          teardown();
+          return start();
+        }
+        if (ctx !== c || source) return; // torn down (page hidden away) or started meanwhile
+        const [loopStart, loopEnd] = loopBounds(buffer);
+        source = c.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        source.loopStart = loopStart;
+        source.loopEnd = loopEnd;
+        source.connect(gain!);
+        source.start(0, loopStart);
+      }
+      fadeGain(1);
+      playing = true;
+    };
+
+    const startElement = async () => {
+      if (!autoplayAllowed('mediaelement')) return blocked();
+      const el = element();
+      try {
+        await el.play();
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'NotAllowedError') return blocked();
+        if (error instanceof DOMException && error.name === 'AbortError') return; // paused meanwhile
+        return fail(error);
+      }
+      unlocked = true;
+      disarm();
+      fadeVolume(el, 1);
+      playing = true;
+    };
+
+    const start = (): Promise<void> => (useElement ? startElement() : startWebAudio());
+
+    const stop = async () => {
+      playing = false;
+      if (audio && useElement) {
+        const el = audio;
+        fadeVolume(el, 0, () => el.pause());
+        return;
+      }
+      fadeGain(0);
+      await wait(FADE * 1000 + 50);
+      // Suspend (not stop) so the loop resumes where it was and the page uses no CPU meanwhile.
+      if (!playing && ctx && ctx.state === 'running') await ctx.suspend().catch(() => {});
+    };
+
+    // One at a time: every change of state calls sync(), which moves playback towards
+    // "wanted && in view && tab visible".
+    let busy = false;
+    let again = false;
+    const sync = async () => {
+      if (busy) {
+        again = true;
+        return;
+      }
+      busy = true;
+      try {
+        do {
+          again = false;
+          const should = wanted && inView && !hidden && !failed;
+          if (should && !playing) await start();
+          else if (!should && playing) await stop();
+        } while (again);
+      } catch (error) {
+        fail(error);
+      } finally {
+        busy = false;
+        render();
+      }
+    };
+
+    // Unlock audio inside a user gesture. Must run synchronously in the event handler: iOS only
+    // lets a page start sound from the gesture itself, not from a later promise callback.
+    const unlockInGesture = () => {
+      try {
+        if (useElement) {
+          const el = element();
+          if (wanted && inView && !hidden) {
+            el.play().catch(() => {});
+          } else {
+            // Unlock for later without making a sound now.
+            el.muted = true;
+            el.play()
+              .then(() => {
+                if (!playing) el.pause();
+              })
+              .catch(() => {})
+              .finally(() => {
+                el.muted = false;
+              });
+          }
+          return;
+        }
+        const c = context();
+        if (!c) return;
+        if (c.state !== 'running') c.resume().catch(() => {});
+        // Older iOS also wants a buffer started inside the gesture: one silent sample.
+        const tick = c.createBufferSource();
+        tick.buffer = c.createBuffer(1, 1, 22050);
+        tick.connect(c.destination);
+        tick.start(0);
+      } catch {
+        // Nothing to unlock with; sync() reports any real failure.
+      }
+    };
+
+    // --- first click / tap / key press anywhere ------------------------------------------------
+    const onGesture = (event: Event) => {
+      if (root.contains(event.target as Node)) return; // the toggle handles its own click
+      if (event instanceof KeyboardEvent && IGNORED_KEYS.has(event.key)) return;
+      if (!wanted || failed) return disarm();
+      preload();
+      unlockInGesture();
+      sync();
+      // Stays armed until the browser actually lets sound play (see startWebAudio/startElement).
+    };
+    function arm() {
+      if (armed || !wanted || failed) return;
+      armed = true;
+      for (const type of GESTURES) document.addEventListener(type, onGesture, { capture: true, passive: true });
+    }
+    function disarm() {
+      if (!armed) return;
+      armed = false;
+      for (const type of GESTURES) document.removeEventListener(type, onGesture, { capture: true });
+    }
+
+    // --- the toggle ----------------------------------------------------------------------------
+    button.addEventListener('click', () => {
+      const on = wanted && unlocked && !failed;
+      if (on) {
+        wanted = false;
+        writePref('off');
+        disarm();
+      } else {
+        wanted = true;
+        writePref('on');
+        // Asked for explicitly: play even with the iPhone's ring/silent switch on silent.
+        const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+        if (session) {
+          try {
+            session.type = 'playback';
+          } catch {
+            // Older Safari: not settable.
+          }
+        }
+        preload();
+        unlockInGesture();
+        unlocked = true; // shown as on at once; set back if the browser still refuses
+      }
+      render();
+      sync();
+    });
+
+    // --- page lifecycle ------------------------------------------------------------------------
+    function teardown() {
+      clearInterval(fadeTimer);
+      try {
+        source?.stop();
+      } catch {
+        // already stopped
+      }
+      source = null;
+      ctx?.close().catch(() => {});
+      ctx = null;
+      gain = null;
+      decoded = null;
+      if (!buffer) fileData = null; // a decode in flight belonged to the closed context
+      if (audio) {
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        audio = null;
+      }
+      playing = false;
+      unlocked = false;
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      hidden = document.visibilityState === 'hidden';
+      sync();
+    });
+    window.addEventListener('pagehide', () => {
+      disarm();
+      teardown();
+      render();
+    });
+    window.addEventListener('pageshow', (event) => {
+      // Back/forward cache: the page comes back without its audio; start over.
+      if (!event.persisted || failed) return;
+      if (wanted) arm();
+      if (inView) {
+        preload();
+        sync();
+      }
+    });
+
+    // Phone: sit directly above the fixed dates/venue line, however many lines it wraps to.
+    const meta = document.querySelector<HTMLElement>('.site-header__meta');
+    if (meta && 'ResizeObserver' in window) {
+      new ResizeObserver(() => root.style.setProperty('--sound-above', `${meta.offsetHeight}px`)).observe(meta);
+    }
+
+    // --- go ------------------------------------------------------------------------------------
+    root.hidden = false;
+    render();
+    if (wanted) arm();
+
+    if (scopeEl) {
+      // Fetch once the block starts to scroll into view (it begins exactly at the bottom edge on the
+      // home page, so the -1px keeps an edge-adjacent block from counting)…
+      const near = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry?.isIntersecting) return;
+          near.disconnect();
+          preload();
+        },
+        { rootMargin: '0px 0px -1px 0px' },
+      );
+      near.observe(scopeEl);
+      // …and play while it covers the middle half of the screen; fade out when scrolled away.
+      new IntersectionObserver(
+        ([entry]) => {
+          inView = !!entry?.isIntersecting;
+          sync();
+        },
+        { rootMargin: '-25% 0px' },
+      ).observe(scopeEl);
+    } else {
+      idle(() => {
+        preload();
+        sync();
+      });
+    }
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-artist-sound]');
+  if (root) {
+    try {
+      setup(root);
+    } catch (error) {
+      root.hidden = true;
+      console.warn('Sound could not be set up:', error);
+    }
+  }
+</script>

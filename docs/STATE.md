@@ -2,10 +2,31 @@
 
 ## Last updated
 
-2026-11-10 — Editor rework (Claude Code): the `/admin` text editor and the site now follow one
-rule, so what a curator sees in the editor is what the site shows. Pull request
-[#5](https://github.com/BromsC/spacecraft-site/pull/5), branch `claude/editor-rework`, merged
-into `main` in this session. Details: DECISIONS 2026-11-10 (six entries).
+2026-11-27 — **Artist sound** (Claude Code): optional looping sound per artist (Tina field
+"Sound"), with a "Sound on / Sound off" toggle. Branch `claude/fervent-bardeen-dico7g`, pull request
+[#6](https://github.com/BromsC/spacecraft-site/pull/6) into `main`, **not merged yet**. No artist has a sound yet. Details: DECISIONS 2026-11-27
+(three entries).
+
+Before that: 2026-11-10 editor rework (PR #5, merged): one text rule in `/admin` and on the site.
+
+## Sound (plain words)
+
+- **Adding a sound in `/admin`:** Artists → the artist → field **"Sound (loops while the page is
+  open)"** (below "Second image caption") → click the field → the media manager opens →
+  **Upload** → choose an **mp3** or **m4a** file (keep it small, about 1–3 MB) → click the file
+  in the list → **Save**. Dragging the file straight onto the field also works. Picking an image
+  by mistake shows "Choose an mp3 or m4a file." and Save stays greyed out. To remove the sound:
+  the bin icon next to the file name → Save.
+- **Where it plays:** on that artist's page (`/artists/<name>`), and on the home page in the
+  "Currently on view" block while that block is on screen (fades out when you scroll away). It
+  loops until the visitor leaves or switches it off.
+- **In the browser:** sound starts after the visitor's first click or tap anywhere on the page;
+  iPhones always need a tap. Until then the pill in the bottom-right corner says **"Sound off"**;
+  tapping it turns sound on, tapping again turns it off. "Off" is remembered while the browser
+  tab stays open: later pages then stay silent until switched on again. Switching to another tab
+  pauses the sound; coming back resumes it. Without a sound in the field there is no pill and
+  nothing is downloaded. On an iPhone with the silent switch on, the automatic start stays
+  silent; pressing "Sound on" plays anyway.
 
 ## The text rule (plain words)
 
@@ -24,14 +45,16 @@ into `main` in this session. Details: DECISIONS 2026-11-10 (six entries).
 
 ## Status summary
 
-1. **Live:** https://thespacecraft.se. PR #5 (editor rework) merged 2026-11-10; before it PR #4
-   (`c55c1b1`), the empty-lines fix `110b57b` and the upright-headings fix `1e79d23`.
-2. `npm run build:site`, `npx astro check` (0 errors, 0 warnings, 0 hints) and
-   `npm run test:text` (60 checks) pass.
+1. **Live:** https://thespacecraft.se. `main` = PR #5 (editor rework, 2026-11-10) plus content
+   commits from `/admin` up to `ee35242` (2026-11-26; deploy run 140 green). The sound feature is
+   on branch `claude/fervent-bardeen-dico7g` until its pull request is merged.
+2. `npm run build:site`, `npx astro check` (0 errors, 0 warnings, 0 hints), `npm run test:text`
+   (all pass) and `npm run test:sound` (all pass) pass.
 3. **The editor in `/admin` is restyled** (site font, 710 px column, same gaps). This was tested
    in Tina's local mode in the sandbox, **not on the live Tina Cloud admin**: see "What Caspar
    must do".
-4. **Content:** Boom! Glass Group *current* (6 – 13 November), Sabrina Gschwandtner *previous*.
+4. **Content:** Helene Kask *current* (20 – 27 November); Sabrina, Boom! Glass Group, Roni
+   Kaufman *previous*; Maria Pita Guerreiro, Joanne Grüne Yanoff *upcoming*. No sounds.
 5. **Still broken:** Sabrina's second image file
    `/uploads/Photo-Joshua_White-jwpictures.com-9991.jpg` was deleted from the repo by a Tina
    media action (`edeab6d`, 2026-11-09) but her **Second image** field still points to it → 404
@@ -40,7 +63,7 @@ into `main` in this session. Details: DECISIONS 2026-11-10 (six entries).
    tag pushes). The same commit (`77102c8`, `main` before the rework) is kept as the **branch**
    `pre-editor-rework` instead.
 
-## What changed on each artist page
+## What changed on each artist page (editor rework, 2026-11-10)
 
 | Page | File edited? | Change on the page |
 | --- | --- | --- |
@@ -56,7 +79,14 @@ now joined with a line break, and each old "empty line" is now a paragraph bound
 **Smoother line breaks** (`text-wrap`, separate commit) then moved some line ends on all pages in
 browsers that support it (no single word alone on a last line; evenly broken headings).
 
-## Rollback
+## Rollback (sound)
+
+- One artist: `/admin` → the artist → Sound → bin icon → Save (no pill, nothing downloaded).
+- The whole feature: GitHub → the merged "artist sound" pull request → **Revert** → merge. A
+  `sound:` line left in an artist file does no harm afterwards (the site ignores fields it
+  doesn't know); clear the Sound fields first anyway to keep the files tidy.
+
+## Rollback (editor rework)
 
 1. GitHub → Pull requests → Closed → **#5** → **Revert** → Create pull request → Merge. The site
    redeploys with the old rules.
@@ -72,9 +102,9 @@ browsers that support it (no single word alone on a last line; evenly broken hea
 
 | Route | Source | Content |
 | --- | --- | --- |
-| `/` | `src/pages/index.astro` | Loading overlay (logo, only if set) → `#landing` (title, dates + venue, "Presenting…" line, "Currently on view" + down arrow) → `#current` (current artist block) → `#exhibitions` (Previous / Upcoming lists + credits line) |
+| `/` | `src/pages/index.astro` | Loading overlay (logo, only if set) → `#landing` (title, dates + venue, "Presenting…" line, "Currently on view" + down arrow) → `#current` (current artist block) → `#exhibitions` (Previous / Upcoming lists + credits line). Sound toggle if the current artist has a sound (plays only while `#current` is in view). |
 | `/artists` | `src/pages/artists/index.astro` | "Currently on view:", "Previous exhibitions:", "Upcoming exhibitions:" lists + credits line. Not linked from anywhere, but kept. |
-| `/artists/[slug]` | `src/pages/artists/[slug].astro` | Artist block + links + "← Home" |
+| `/artists/[slug]` | `src/pages/artists/[slug].astro` | Artist block + links + "← Home". Sound toggle if the artist has a sound. |
 | `/404` | `src/pages/404.astro` | "Nothing here." + "Back to the start" |
 | `/admin` | built by `tinacms build` in CI | Tina Cloud login |
 
@@ -119,6 +149,16 @@ browsers that support it (no single word alone on a last line; evenly broken hea
   period. Empty group → one placeholder row `"..."`. Credits line (`footerText`) centred at the
   bottom of the section (at least one screen tall). Phone: Upcoming → Previous → credits.
 - `src/components/Arrow.astro` — inline SVG arrow, `direction` `right|down`, accent colour.
+- `src/components/visual/ArtistSound.astro` — the artist's looping sound + toggle. Rendered only
+  when the artist has `sound` (otherwise no markup, no script). Web Audio (fetch →
+  `decodeAudioData` → looping `AudioBufferSourceNode` → `GainNode`, 300 ms fades), `<audio loop>`
+  fallback. Props `src`, `scope` (home: `"current"` → plays while `#current` covers the middle
+  half of the screen). Lazy: fetch at idle (artist page) / when `#current` scrolls into view /
+  on the first click. Autoplay tried; if refused, "Sound off" + the first click/tap/key starts
+  it. `sessionStorage` `spacecraft:sound` = `on`/`off`. Pauses on hidden tab, stops on
+  `pagehide`. Toggle CSS in `global.css` ("Sound toggle"): fixed pill, bottom right (16 px from
+  the bottom on desktop; on a phone directly above the dates/venue line), `<button
+  aria-pressed>`, accessible name "Sound", hidden without JS.
 - Loading overlay (`index.astro`): white layer with the logo; after the logo loads (max 2 s) it
   stays 800 ms, fades 500 ms, is removed. Reduced motion → removed at once. JS only.
 - `src/lib/content.ts` — data helpers + async `renderCaption()` (Sätteri via
@@ -135,6 +175,9 @@ browsers that support it (no single word alone on a last line; evenly broken hea
 - `scripts/text-test.mjs` (`npm run test:text`) — Tina round trip of every tool, all artist
   files byte for byte, and the site's rendering of the same fixtures.
 - `scripts/content-report.mjs` — lists anything outside the tool set, with file and line.
+- `scripts/sound-check.mjs` (`npm run test:sound`, after a build) — the toggle and its script are
+  on exactly the pages whose artist has a sound (home: the current artist), built `hidden`;
+  warns about a missing file, a type other than mp3/m4a, or a file over 3 MB.
 
 ### Design tokens (`src/styles/global.css`)
 
@@ -174,18 +217,42 @@ title (Chrome/Edge, Safari 26; `balance` also Firefox).
 | --- | --- | --- | --- |
 | `site` | singleton | `content/site/settings.json` | siteTitle, tagline, socialLinks[] {label, url} (*unused*), footerText ("Credits line") |
 | `exhibition` | singleton | `content/exhibition/current.md` | title, datesLine, startDate, endDate, venue, presentingPrefix, currentLabel, logo |
-| `artists` | list | `content/artists/*.md` (filename = slug) | name, status (current / upcoming / previous), period, order, imageSide (*unused*), mainImage, body ("Text"), btsImage ("Second image"), btsCaption ("Second image caption"), links[] {label, url} |
+| `artists` | list | `content/artists/*.md` (filename = slug) | name, status (current / upcoming / previous), period, order, imageSide (*unused*), mainImage, body ("Text"), btsImage ("Second image"), btsCaption ("Second image caption"), sound ("Sound (loops while the page is open)": `/uploads/x.mp3`, optional; `""` = none), links[] {label, url} |
 
 Fields: landing title = `title`; landing dates = `datesLine` + ". " + `venue` + "."; "Presenting…"
 = `presentingPrefix` + all artist names by `order`; `#current` = first artist (by `order`) with
 status `current` (none → arrow and `#current` left out); lists filtered by `status`, sorted by
 `order`. Incomplete link items are dropped (zod), not build errors. Tina schema version 4.0.1.
 
+Tina media: `media.tina` (`public/uploads`); uploads allowed = Tina's default list + mp3/m4a
+(`media.accept`, made effective by `cmsCallback`, see DECISIONS 2026-11-27). The `sound` field
+is an `image` field with `ui.validate` (mp3/m4a only).
+
 Current content: "Out of This World! Exhibition Festival of Contemporary Craft and Innovation.",
 30 October – 11 December 2026, Jan Stenbecks torg, Kista; logo `/uploads/LOGO.png`. Artists by
-order: Sabrina Gschwandtner (previous, 30 October – 6 November), **Boom! Glass Group (current,
-6 – 13 November)**, Roni Kaufman (upcoming, November 13th; main + second image, caption), Helene
-Kask (November 20th), Maria Pita Guerreiro (November 27th), Joanne Grüne Yanoff (December 4th).
+order: Sabrina Gschwandtner (previous, "30 October"), Boom! Glass Group (previous, "6 November"),
+Roni Kaufman (previous, "13 November"), **Helene Kask (current, 20 – 27 November)**, Maria Pita
+Guerreiro (upcoming, 27 November – 4 December), Joanne Grüne Yanoff (upcoming, 4 – 11
+December). No artist has a sound.
+
+### Verified — artist sound (2026-11-27)
+
+- **Site (headless Chromium, on a copy of the project with a test tone set on two artists; the
+  real content files were not touched):** without a click the pill shows "Sound off", nothing
+  plays, no console error; after a click it plays, loops (past the 2 s file length, one source,
+  never ended) and is audible; tab hidden → faded out and paused, visible → resumed; "Sound off"
+  → silent, and on the next pages no download and no AudioContext even after clicks; keyboard
+  Enter on the focused pill switches it on (focus ring visible); home page: nothing downloaded on
+  the landing, plays when `#current` is on screen, fades out when scrolled to the top or to the
+  lists, plays again when back; artist without sound: no pill, no script, no download; no
+  JavaScript: no pill; `<audio>` fallback (Web Audio removed) incl. the browser's real
+  `NotAllowedError`; `sessionStorage` blocked; missing file (404) → pill disappears, one warning.
+  Phone 390 and 320 px: pill above the dates/venue line, no overlap; a tap starts it. mp3 and m4a.
+  Headless Chromium doesn't enforce autoplay rules for Web Audio, so the browsers' rules were
+  imitated in the test (iPhone-strict, Chrome, and "autoplay allowed"): all checks pass in each.
+- **Tina local mode:** an mp3 dropped on the field and an m4a uploaded in the media manager both
+  upload and can be chosen; an image is refused; Save writes `sound: /uploads/…`.
+- **Not verified:** real iPhone / Safari / Firefox; an audio upload in the live Tina Cloud admin.
 
 ### Verified — editor rework (headless Chromium, 1512×982 and 390×844)
 
@@ -206,13 +273,28 @@ Kask (November 20th), Maria Pita Guerreiro (November 27th), Joanne Grüne Yanoff
 
 - `.github/workflows/deploy.yml` — on push to `main` and manual dispatch: `npm ci` →
   configure-pages → `npx tinacms build` → `node scripts/inject-admin-css.mjs` (both only with
-  Tina secrets) → `npx astro build` → content report → text test (both report-only, never fail
-  the deploy; the report is on the run's Summary page) → deploy to Pages.
+  Tina secrets) → `npx astro build` → content report → text test → sound check (all three
+  report-only, never fail the deploy; the reports are on the run's Summary page) → deploy to
+  Pages.
 
 **Operational rule — how to redeploy:** Actions → "Deploy to GitHub Pages" → **Run workflow**
 (on `main`). Never "Re-run all jobs" on an old run (it redeploys that run's old commit).
 
 ## What Caspar must do (browser only)
+
+**Sound (new):**
+
+0. **Merge pull request #6** (GitHub → Pull requests → #6 "feat: optional looping sound per artist" → Merge), wait for
+   the deploy (Actions, about 2 minutes).
+1. **Try it once in the live admin:** https://thespacecraft.se/admin/ → Artists → any artist →
+   **Sound** → click it → **Upload** → pick a small mp3 → click it → **Save**. Wait for the
+   deploy, open that artist's page, click anywhere: the sound should start and the pill should
+   say "Sound on". If the upload says "Invalid file type", say so in the Project chat (the live
+   admin then needs a different fix than the local test showed). Remove it again (bin icon →
+   Save) if it was only a test.
+2. On an iPhone: open the page, tap once, check the sound and the "Sound on / off" pill.
+
+**Earlier checklist (editor rework):**
 
 1. **Check the editor:** open https://thespacecraft.se/admin/ → Artists → **Roni Kaufman**. The
    **Text** box should show the site's font in a narrower column, with a clear blank line between
@@ -238,11 +320,12 @@ text is unaffected. Say so in the Project chat, or roll back (above).
 
 ## In progress
 
-- Nothing. Waiting on Caspar's checks above.
+- Artist sound: PR [#6](https://github.com/BromsC/spacecraft-site/pull/6) open, waiting for merge and Caspar's live check (above).
 
 ## Next steps
 
-1. Caspar's checklist; fix whatever the live admin shows differently from the local test.
+1. Caspar's checklist; fix whatever the live admin shows differently from the local test
+   (editor styling, audio upload).
 2. Unpin `@tinacms/cli` / remove the `@tinacms/graphql` override, regenerate
    `tina/tina-lock.json`, verify CI's Tina step (own session, on a green `main`). After any Tina
    update: run `npm run test:text` and re-check the editor styling.
@@ -250,6 +333,11 @@ text is unaffected. Say so in the Project chat, or roll back (above).
 
 ## Open questions for Caspar
 
+- **Sound pill on the home page:** it shows from the start (also over the landing), because the
+  page has a sound. Hide it until "Currently on view" is reached? (WCAG only needs it while the
+  sound can play.)
+- **Sound default:** sound starts on the first click anywhere. Prefer it to start only when the
+  visitor presses "Sound on"?
 - **Quotes in captions:** in the text, straight quotes become curly (" → “ ”) automatically; in
   captions they stay as typed. Make captions curly too? (It would change Sabrina's caption.)
 - **Editor text size:** 20 px in the editor (site: 24 px on a wide screen). Bigger, smaller?
@@ -262,7 +350,15 @@ text is unaffected. Say so in the Project chat, or roll back (above).
 
 ## Known issues
 
-- **Sabrina's second image 404s** (Status 4).
+- **Audio uploads depend on a Tina workaround** (`cmsCallback` in `tina/config.ts`): Tina 3.15
+  drops `media.accept` from the schema, so audio would otherwise be refused. If a Tina update
+  changes its internals, uploads fall back to Tina's list (audio refused); the rest of the admin
+  and the site are unaffected. Re-test an mp3 upload after any Tina update.
+- **Sound toggle CSS** uses 15 px for the phone dates/venue line's bottom offset, copied from
+  `.site-header__meta`; change both together.
+- Chrome may print a yellow *warning* (not an error) "The AudioContext was not allowed to start"
+  on a page with a sound before the first click. Harmless.
+- **Sabrina's second image 404s** (Status 5).
 - **`/admin` commits are authored by `tinacloud-app[bot]`**: with "act as self", Tina falls back to
   the bot when the editor's GitHub account can't write to the repo. Saving works. If attribution
   matters: GitHub → repo Settings → Collaborators → add their account (Write).
@@ -322,7 +418,9 @@ No forwarding rules. Untouched: `_dmarc` TXT, `_domainconnect` CNAME.
 
 - Production: https://thespacecraft.se (admin: https://thespacecraft.se/admin/)
 - https://bromsc.github.io/spacecraft-site/ → redirects to the domain.
-- `main`: PR #5 merge (2026-11-10, editor rework) on top of `77102c8`. Earlier: `1e79d23`
+- Sound feature: branch `claude/fervent-bardeen-dico7g` → PR [#6](https://github.com/BromsC/spacecraft-site/pull/6) into `main`.
+- `main`: content commits from `/admin` up to `ee35242` (2026-11-26) on top of the PR #5 merge
+  (2026-11-10, editor rework) on top of `77102c8`. Earlier: `1e79d23`
   (upright headings), `110b57b` (empty lines), PR #4 `c55c1b1`, PR #3 `84ab069`.
 - Rollback point: branch `pre-editor-rework` = `77102c8`.
 - Deploy runs: https://github.com/BromsC/spacecraft-site/actions
