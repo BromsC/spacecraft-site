@@ -313,18 +313,20 @@ p {
 }
 
 /* Sound toggle (src/components/visual/ArtistSound.astro) ------------------------------------- */
-/* A pill like the header's. Desktop: bottom right. Phone: bottom right, directly above the fixed
-   dates/venue line (--sound-above = that line's height, measured by the script). Hidden without
-   JS and on pages without a sound. Stays visible while the page has a sound (WCAG 1.4.2). */
+/* A white pill like the header's, with blue (accent) text. Desktop: bottom right, header size.
+   Phone: bottom right, 15px, directly above the fixed dates/venue line (--sound-above = that
+   line's height, measured by the script). Hidden without JS and on pages without a sound. Stays
+   visible while the page has a sound (WCAG 1.4.2). */
 
 .sound {
   position: fixed;
   z-index: 10;
   right: 0;
-  bottom: calc(15px + var(--sound-above, 1.25em) + 6px); /* 15px = .site-header__meta bottom */
+  bottom: calc(15px + var(--sound-above, 15px) + 10px); /* 15px = .site-header__meta bottom */
   padding-inline: calc(var(--gutter) - var(--pill-pad));
-  font-size: var(--fs-header);
+  font-size: 15px;
   font-weight: 500;
+  color: var(--color-accent);
   font-style: oblique 12deg;
 }
 
@@ -346,11 +348,16 @@ p {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* At least 24 × 24 px to hit (WCAG 2.5.8), without changing the pill's size or place. */
+/* Hit area larger than the pill, without changing the pill's size or place. Phone: at least
+   32 × 32 px; desktop: at least 24 × 24 px (WCAG 2.5.8). */
 .sound__toggle::before {
   content: '';
   position: absolute;
-  inset: -6px -4px;
+  top: 50%;
+  left: 50%;
+  width: max(100% + 8px, 32px);
+  height: max(100% + 12px, 32px);
+  transform: translate(-50%, -50%);
 }
 
 .sound__toggle:focus-visible {
@@ -364,14 +371,22 @@ p {
 
 @media (max-width: 47.99rem) {
   html:has(.sound:not([hidden])) main {
-    padding-bottom: 56px; /* room for the toggle above the fixed bottom line */
+    padding-bottom: 72px; /* room for the toggle above the fixed bottom line */
   }
 }
 
 @media (min-width: 48rem) {
   .sound {
     bottom: var(--header-top);
+    font-size: var(--fs-header);
     font-style: normal;
+  }
+
+  .sound__toggle::before {
+    width: auto;
+    height: auto;
+    inset: -6px -4px;
+    transform: none;
   }
 }
 
