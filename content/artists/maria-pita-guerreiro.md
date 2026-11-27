@@ -8,6 +8,7 @@ mainImage: /uploads/MariaP.png
 btsImage: /uploads/SUN-LAMP2.png
 btsCaption: |
   Maria Pita Guerreiro, “Sun Therapy”.
+sound: /uploads/SUN-THERAPY-_SOUNDWORK.mp3
 ---
 
 ### SUN THERAPY
