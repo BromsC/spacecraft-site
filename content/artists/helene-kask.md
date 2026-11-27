@@ -12,6 +12,9 @@ btsCaption: |
 
 ### Talismanic Bodies
 
+\
+20 – 27 November
+
 Welcome to the opening on Friday, 20 November.\
 4:00-5:00 PM.
 
