@@ -14,6 +14,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "test:text": "node scripts/text-test.mjs",
+    "test:sound": "node scripts/sound-check.mjs",
     "astro": "astro",
     "tinacms": "tinacms"
   },

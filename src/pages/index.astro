@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Arrow from '../components/Arrow.astro';
 import ArtistFeature from '../components/ArtistFeature.astro';
 import ExhibitionLists from '../components/ExhibitionLists.astro';
+import ArtistSound from '../components/visual/ArtistSound.astro';
 import {
   byStatus,
   getArtists,
@@ -90,6 +91,8 @@ const current = getCurrentArtist(artists);
   </section>
 
   {current && <ArtistFeature id="current" artist={current} />}
+  {/* Plays only while #current is in view. */}
+  {current?.data.sound && <ArtistSound src={current.data.sound} scope="current" />}
 
   <ExhibitionLists
     id="exhibitions"

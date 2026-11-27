@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from 'astro';
 import Layout from '../../layouts/Layout.astro';
 import ArtistFeature from '../../components/ArtistFeature.astro';
+import ArtistSound from '../../components/visual/ArtistSound.astro';
 import { getArtists } from '../../lib/content';
 import { url } from '../../lib/url';
 
@@ -11,7 +12,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { artist } = Astro.props;
-const { name, links } = artist.data;
+const { name, links, sound } = artist.data;
 ---
 
 <Layout title={name}>
@@ -31,4 +32,5 @@ const { name, links } = artist.data;
     }
     <p class="back-link"><a href={url('/')}>← Home</a></p>
   </ArtistFeature>
+  {sound && <ArtistSound src={sound} />}
 </Layout>

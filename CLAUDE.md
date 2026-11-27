@@ -64,13 +64,15 @@ src/
   layouts/Layout.astro   # shared shell: <head>, font preload, sticky SiteHeader (no nav/footer)
   components/            # .astro components (PascalCase): SiteHeader, ArtistFeature, ExhibitionLists,
                          #   Arrow
-  components/visual/     # client-only visual islands (Three.js etc. later)
+  components/visual/     # client-only islands: ArtistSound (looping artist sound + toggle);
+                         #   Three.js etc. later
   pages/                 # routes: index, artists/index, artists/[slug], 404
   styles/global.css      # design tokens (:root) + global styles
 scripts/
   text-test.mjs          # `npm run test:text`: Tina round trip + site rendering of the text rule
   inject-admin-css.mjs   # adds tina/admin.css to the built admin page (CI, fail-safe)
   content-report.mjs     # CI job summary: constructs outside the editor's tool set
+  sound-check.mjs        # `npm run test:sound` (after a build): sound toggle exactly where set
 tina/
   config.ts              # Tina schema — must mirror src/content.config.ts
   rich-text.ts           # the artist rich-text fields (toolbar, descriptions), shared with the test
@@ -92,6 +94,8 @@ docs/
 - Text rule (editor and site): Enter = paragraph = one blank line, Shift+Enter = line break.
   After touching `.prose` CSS, `src/lib/blank-lines.ts`, `tina/rich-text.ts` or Tina versions,
   run `npm run test:text`.
+- Sound: after touching `ArtistSound.astro`, the `sound` field or the sound toggle CSS, run
+  `npm run build:site` then `npm run test:sound`.
 - Content entry ids come from filenames. Don't add a `slug` frontmatter field — Astro's glob
   loader would use it as the id and it would drift from the filename Tina manages.
 

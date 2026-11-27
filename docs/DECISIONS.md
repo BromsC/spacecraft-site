@@ -634,3 +634,91 @@ Format: date · decision · why · alternatives rejected.
 - **Effect:** some lines break differently in Chromium (e.g. no single word alone on a last
   line). This is the only reason Sabrina's and Boom's pages are no longer pixel-identical to
   the old `main`.
+
+## 2026-11-27 — Optional looping sound per artist: Web Audio, `<audio loop>` as fallback
+
+- **Decision:** new optional artist field `sound` (public path, `/uploads/x.mp3`, same convention
+  as the image fields) in `tina/config.ts` and `src/content.config.ts` (Tina writes `""` when the
+  field is cleared; zod turns that into "no sound"). Played by
+  `src/components/visual/ArtistSound.astro` on `/artists/[slug]` when that artist has a sound,
+  and on the home page for the `#current` artist only while `#current` covers the middle half of
+  the screen (IntersectionObserver, `rootMargin: -25% 0px`; 300 ms fade out when scrolled away).
+- **Playback:** `fetch` → `decodeAudioData` → `AudioBufferSourceNode` with `loop = true` →
+  `GainNode` (300 ms linear fades) → speakers. Pausing (scrolled away, tab hidden, switched off)
+  fades to 0 and then suspends the AudioContext, so the loop resumes where it was and the page
+  uses no CPU meanwhile. Loop points skip near-silent encoder padding (at most 100 ms per end).
+  Measured in Chromium: a 2.000 s mp3 and a 2.000 s m4a both decode to exactly 2.000 s.
+- **Why Web Audio:** `<audio loop>` can leave an audible gap at the loop point in several browsers
+  (the element seeks back to 0 and re-buffers; mp3 padding adds silence); a decoded buffer loops
+  sample-exactly. Fades are also exact on the audio clock, and `<audio>` volume is ignored on iOS.
+- **Fallback:** `<audio loop>` (volume fades where the browser allows them) when there is no
+  `AudioContext`, or when Web Audio can't decode the file. A file that can't be loaded at all
+  (404, unsupported) hides the toggle and logs one console warning; never an error.
+- **Lazy:** nothing is fetched until the page is idle (artist page) or `#current` starts to
+  scroll into view (home; it starts exactly at the bottom edge, hence `-1px`), or on the
+  visitor's first click/tap/key. Never while the visitor has switched sound off. A page whose
+  artist has no sound gets no markup, no script, no listeners, no AudioContext (the component
+  is not rendered at all; `scripts/sound-check.mjs` checks the built pages).
+- **No new dependency.** Rejected: Howler.js (a dependency for what ~400 lines of plain script
+  do here; underneath it is the same Web Audio buffer loop); Tone.js (far too large).
+
+## 2026-11-27 — Autoplay: try, and if refused start on the first click, tap or key press
+
+- **Decision:** when the sound should start, the script tries (`AudioContext.resume()`, waits at
+  most 400 ms; or `audio.play()`). If the context stays `suspended` or `play()` rejects with
+  `NotAllowedError`, the toggle shows **"Sound off"** and listeners on `document` (capture,
+  passive) for `pointerdown`, `pointerup`, `keydown` start the sound **inside** the event
+  handler (`resume()` called synchronously, plus one silent sample for older iOS), which is what
+  iOS requires. `pointerup` is listened to because a touch only counts on release. The listeners
+  stay until the browser actually lets sound play, then are removed. Tab, Shift, Escape and
+  modifier keys don't count (moving focus to the toggle must not start the sound). Where
+  `navigator.getAutoplayPolicy()` exists (Firefox), a "disallowed" answer skips creating an
+  AudioContext before a gesture.
+- **The visitor's choice** is stored in `sessionStorage` (`spacecraft:sound` = `on`/`off`, in
+  try/catch; blocked storage = choice lasts for the page). Off → no fetch, no AudioContext, no
+  listeners on later pages until switched on again. On the toggle's own "Sound on", Safari's
+  `navigator.audioSession.type = 'playback'` is set (plays with the iPhone's silent switch on;
+  the automatic first-tap start does not, so a muted phone stays silent).
+- **Page lifecycle:** `visibilitychange` hidden → fade out + suspend, visible → resume if it was
+  playing; `pagehide` → stop, close the context; back/forward cache restore → start over.
+- **Not tied to `prefers-reduced-motion`** (sound is not motion; the toggle is the control).
+- **Toggle:** a real `<button aria-pressed>` in a fixed pill like the header's (same size,
+  weight, white pill), bottom right; on a phone directly above the fixed dates/venue line (its
+  height is measured, so a wrapped line doesn't overlap). Visible text "Sound on"/"Sound off";
+  the accessible name is "Sound" (the "on/off" word is `aria-hidden`) and the state is
+  `aria-pressed`, so a screen reader says "Sound, toggle button, pressed" instead of contradicting
+  itself. 2 px focus ring on the pill, hit area ≥ 24 × 24 px. Visible for as long as the page
+  has a sound (WCAG 1.4.2), built `hidden` so it doesn't exist without JavaScript.
+- **Tested:** headless Chromium ignores the autoplay policy for Web Audio (it enforces it for
+  `<audio>`), so the browser policies were emulated in the test (iOS: only synchronously inside
+  a gesture; Chrome: after any activation; plus "autoplay allowed"). 37/37, 37/37, 35/35 checks;
+  m4a 37/37. Not tested on real iPhone/Safari/Firefox hardware.
+- **Rejected:** a "click to enter" splash (blocks the page for everyone to serve a sound some
+  visitors don't want); starting muted and unmuting (still needs a gesture on iOS).
+
+## 2026-11-27 — Tina: "image" field for audio; audio added to the upload list via `cmsCallback`
+
+- **Decision:** the `sound` field is `type: 'image'` (Tina's only media-manager field; it shows
+  a file icon and the path for non-images), label "Sound (loops while the page is open)", with
+  `ui.validate` refusing anything but `.mp3`/`.m4a` ("Choose an mp3 or m4a file.", Save stays
+  disabled). Uploads: Tina's default list (`DEFAULT_MEDIA_UPLOAD_TYPES`: images, video, PDF, …,
+  **no audio**) plus `audio/mpeg`, `audio/mp3`, `audio/mp4`, `audio/x-m4a`, `audio/m4a`.
+- **Docs (tina.io was unreachable from the sandbox; read from the docs' source repo
+  `tinacms/docs`, "Overriding Accepted Media Types" and "Image Fields", 2026-11-26):** global
+  `media.accept: [MIME types]`; per field `accept:` with extensions or the categories
+  `image`/`video`/`audio`/`document`, where `audio` = mp3, wav, ogg.
+- **Why not the field's `accept`:** its vocabulary has no `m4a` (unknown values are dropped), so
+  `accept: 'audio'` or `['mp3', 'm4a']` would refuse every m4a.
+- **Why `cmsCallback` as well as `media.accept`:** in this Tina version (`tinacms` 3.15,
+  `@tinacms/schema-tools` 2.11) the config check that writes `_schema.json`/`tina-lock.json`
+  keeps only `media.tina`, so `media.accept` never reaches the admin; and the drop zone on a
+  field always uses `cms.media.accept`, which `TinaMediaStore` hard-wires to the default list.
+  Verified in Tina's local mode: with `media.accept` alone, mp3 and m4a were refused ("Invalid
+  file type") both in the media manager and on the field. `cmsCallback` defines `accept` on the
+  `cms.media` instance (same list); with it, an mp3 dropped on the field and an m4a uploaded in
+  the media manager both uploaded, could be selected, and saving wrote
+  `sound: /uploads/hum-test.mp3`. `media.accept` is kept (documented; takes over if Tina starts
+  passing it through). Unsupported Tina internals: if a Tina update breaks it, uploads fall back
+  to Tina's default list (audio refused), nothing else breaks.
+- **`tina/tina-lock.json`** regenerated: the only change is the new field.
+- **Not verified:** an audio upload in the live Tina Cloud admin (needs a login).
