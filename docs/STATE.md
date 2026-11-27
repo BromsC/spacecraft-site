@@ -3,8 +3,8 @@
 ## Last updated
 
 2026-11-27 — **Artist sound** (Claude Code): optional looping sound per artist (Tina field
-"Sound"), with a "Sound on / Sound off" toggle. Branch `claude/fervent-bardeen-dico7g`, pull
-request to `main` (see "Deploy URL"). No artist has a sound yet. Details: DECISIONS 2026-11-27
+"Sound"), with a "Sound on / Sound off" toggle. Branch `claude/fervent-bardeen-dico7g`, pull request
+[#6](https://github.com/BromsC/spacecraft-site/pull/6) into `main`, **not merged yet**. No artist has a sound yet. Details: DECISIONS 2026-11-27
 (three entries).
 
 Before that: 2026-11-10 editor rework (PR #5, merged): one text rule in `/admin` and on the site.
@@ -284,7 +284,7 @@ December). No artist has a sound.
 
 **Sound (new):**
 
-0. **Merge the pull request** (GitHub → Pull requests → the "artist sound" PR → Merge), wait for
+0. **Merge pull request #6** (GitHub → Pull requests → #6 "feat: optional looping sound per artist" → Merge), wait for
    the deploy (Actions, about 2 minutes).
 1. **Try it once in the live admin:** https://thespacecraft.se/admin/ → Artists → any artist →
    **Sound** → click it → **Upload** → pick a small mp3 → click it → **Save**. Wait for the
@@ -320,7 +320,7 @@ text is unaffected. Say so in the Project chat, or roll back (above).
 
 ## In progress
 
-- Artist sound: pull request open, waiting for merge and Caspar's live check (above).
+- Artist sound: PR [#6](https://github.com/BromsC/spacecraft-site/pull/6) open, waiting for merge and Caspar's live check (above).
 
 ## Next steps
 
@@ -418,7 +418,7 @@ No forwarding rules. Untouched: `_dmarc` TXT, `_domainconnect` CNAME.
 
 - Production: https://thespacecraft.se (admin: https://thespacecraft.se/admin/)
 - https://bromsc.github.io/spacecraft-site/ → redirects to the domain.
-- Sound feature: branch `claude/fervent-bardeen-dico7g` → pull request into `main`.
+- Sound feature: branch `claude/fervent-bardeen-dico7g` → PR [#6](https://github.com/BromsC/spacecraft-site/pull/6) into `main`.
 - `main`: content commits from `/admin` up to `ee35242` (2026-11-26) on top of the PR #5 merge
   (2026-11-10, editor rework) on top of `77102c8`. Earlier: `1e79d23`
   (upright headings), `110b57b` (empty lines), PR #4 `c55c1b1`, PR #3 `84ab069`.
