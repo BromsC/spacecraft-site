@@ -26,4 +26,4 @@ Maria Pita Guerreiro is a Portuguese experimental designer and artist based in S
 
 She has participated in numerous art and design residencies throughout Europe, and her work has been featured internationally at design fairs, museums, and galleries. Her most recent solo show, WINTER BLUES, was exhibited at Konstepidemin in Gothenburg.
 
-https\://mariapitaguerreiro.com
+[More information at mariapitaguerreiro.com](https://mariapitaguerreiro.com/)
