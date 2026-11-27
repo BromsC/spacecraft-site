@@ -1,6 +1,6 @@
 ---
 name: Helene Kask
-status: current
+status: previous
 period: 20 – 27 November
 order: 4
 imageSide: left
